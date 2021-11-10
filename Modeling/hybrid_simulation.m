@@ -41,50 +41,57 @@ function [tout, zout, uout, indices] = hybrid_simulation(z0,ctrlpts,p,tspan)
         [zout(6:10,i+1), slip] = discrete_impact_contact(zout(:,i+1), p, restitution_coeff, friction_coeff, ground_height);
         zout(1:5,i+1) = zout(1:5,i) + zout(6:10, i+1)*dt;
         uout(:,i+1) = u; 
-        
-        % do not let anything except the hopping for touch the ground
-        pos = position_swinging_foot(zout(:, i+1),p);
-        vel = velocity_swinging_foot(zout(:, i+1),p);
-        Cy = pos(2) - ground_height;
-        dCy = vel(2);
-        
+       
+        % anolymous detection
+        iphase = iphase_list(i);
         if slip % hopping leg slipped
             iphase = -1;
-        elseif(zout(1, i+1) > 0 && iphase == 1) % jump
-            iphase = 2;
-        elseif(Cy<0 && dCy<0) % swinging leg hit floor
-            iphase = -1;
-        else
+        elseif true            
+            % do not let anything except the hopping for touch the ground
+            pos = position_swinging_foot(zout(:, i+1),p);
+            vel = velocity_swinging_foot(zout(:, i+1),p);
+            Cy = pos(2) - ground_height;
+            dCy = vel(2);
+            if(Cy<0 && dCy<0) % swinging leg hit floor
+                iphase = -1;
+            end 
+       
             pos = position_knee(zout(:, i+1),p);
             vel = velocity_knee(zout(:, i+1),p);
             Cy = pos(2) - ground_height;
             dCy = vel(2);
             if(Cy<0 && dCy<0) % knee hit floor
                 iphase = -1;
-            else
-                pos = position_hip(zout(:, i+1),p);
-                vel = velocity_hip(zout(:, i+1),p);
-                Cy = pos(2) - ground_height;
-                dCy = vel(2);
-                if(Cy<0 && dCy<0) % hip hit floor
-                    iphase = -1;
-                end
             end
+            
+            pos = position_hip(zout(:, i+1),p);
+            vel = velocity_hip(zout(:, i+1),p);
+            Cy = pos(2) - ground_height;
+            dCy = vel(2);
+            if(Cy<0 && dCy<0) % hip hit floor
+                iphase = -1;
+            end            
+        end % iphase determination
+        
+        if (zout(5, i+1) > ground_height && iphase == 1) % jump
+            iphase = 2;
         end
-        iphase_list(i+1) = iphase;
-    end
+        
+        iphase_list(i+1) = iphase;    
+    end % simulation loop
     
-    j=1; % keeps track of phase changes
-    indices = [0;0];
+    % TODO: fix the indices logic and determine how to use
+    j=1;
+    indices = 0;
     for i = 1:num_step-1
         if (iphase_list(i+1) == iphase_list(i))
-            indices(2, j) = indices(2, j)+1;
+            indices(j) = indices(j)+1;
         else
-            indices(1,j) = iphase_list(i); % grab id of phase that just ended
             j = j+1;
-            indices(2,j) = 0;
+            indices(j) = 0;
         end
     end
+    
 end
 
 %% Discrete Contact
