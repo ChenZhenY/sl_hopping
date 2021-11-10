@@ -23,17 +23,18 @@ function f = hopping_objective(x,z0,p)
     [tout, zout, uout, indices] = hybrid_simulation(z0, ctrl, p, [0 tf]);
     COM = COM_jumping_leg(zout,p);
     % f = -COM_end;                                           % negative of COM height
-    f = -max(COM(2,:));
+    % f = -max(COM(2,:));
     
     
     t0 = 0; tend = tf;   % set initial and final times
     dt = 0.001;
     num_step = floor((tend-t0)/dt);
-    torque = zeros(1, num_step);
-    for i = 1:num_step-1
-        torque(i) = BezierCurve(ctrl, i*dt/tf);
-    end
-    work = torque*torque.';
+%     torque = zeros(1, num_step);
+%     for i = 1:num_step-1
+%         torque(i) = BezierCurve(ctrl.T, i*dt/ctrl.tf);
+%     end
+%     work = torque*torque.';
 %     f = work;                                         % minimize T^2 integral
+f = -(zout(5,end) - zout(5,1));
     
 end

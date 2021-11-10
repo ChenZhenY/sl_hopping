@@ -20,19 +20,34 @@ function [cineq ceq] = hopping_constraints(x,z0,p)
 % provided using an anonymous function, just as we use anonymous
 % functions with ode45().
 
+% todo: add slip constraints
+
     tf = p(end);
     ctrl = x;
     [tout, zout, uout, indices] = hybrid_simulation(z0, ctrl, p, [0 tf]);
     theta1 = zout(1,:); 
     theta2 = zout(2, :);
     COM = COM_jumping_leg(zout,p);
-    violation_count = sum(indices(1,:) == -1);
+    ground_height = p(end-1);
     
-    cineq = [-min(theta2) + pi/6;... % leg geometry constraints
-        max(theta1 + theta2)-2*pi/3;... 
+    % check if anything other than the hopping foot touches the ground
+    sw_Cy = zeros(numel(tout),1); k_Cy = zeros(numel(tout),1); h_Cy = zeros(numel(tout),1);
+    for i = 1:numel(tout)
+        sw_pos = position_swinging_foot(zout(:, i),p);
+        sw_Cy(i) = sw_pos(2) - ground_height;
+        k_pos = position_knee(zout(:, i),p);
+        k_Cy(i) = k_pos(2) - ground_height;
+        h_pos = position_hip(zout(:, i),p);
+        h_Cy(i) = h_pos(2) - ground_height;
+    end
+    
+    cineq = [-min(theta2) + pi/6;... % joint limits
+        max(theta1 + theta2)-2*pi/3;...
         max(theta2) - 2*pi/3;...
         -min(theta1) - pi/3;...
-        % violation_count;...        % indices checks for non-foot parts hitting ground, slip
+        -min(sw_Cy); ... % swinging leg does not contact floor
+        -min(k_Cy); ... % knee does not contact floor
+        -min(h_Cy);... % hip does not contact floor
         -(zout(4,end) - zout(4,1) - .1) ]; % leg moves forward in x direction
     
     ceq = [min(zout(3,:)) - max(zout(3,:))]; % swing leg angle stays fixed

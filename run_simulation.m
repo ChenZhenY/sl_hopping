@@ -16,15 +16,13 @@ setpath                                     % add AutoDerived, Modeling, and Vis
 % set to run optimization over hopping leg or over swing leg
 run_hopping = true;
 
-% set initial state z = [q, dq] q = [t1 t2 t3 x y]
-z0 = [0; pi/6; -pi/3; 0; 0; 0; 0; 0; 0; 0]; 
-p = parameters();  % get parameters from file
-pos_foot0 = position_foot(z0, p);
-        
+z0 = [0; pi/4; -pi/6; 0; 0; 0; 0; 0; 0; 0];    
+p = parameters();                           % get parameters from file
+pos_foot0 = position_foot(z0, p);  
 ground_height = pos_foot0(2);
-tf = 2.0; %simulation time
+tf = 1.0; %simulation time
 p = [p; ground_height; tf];
-   
+
 % An equation has been added to dynamics_continuous and dynamics_discrete
 % to integrate this new state.
 
@@ -33,16 +31,16 @@ if run_hopping
     % set guess
     % tf = .7;     % 0.5                                   % simulation final time
     % ctrl.tf = .2;    % 0.35                              % control time points
-    ctrl.T = ones(3,6)*0.76;                             % control values
+    ctrl = ones(3,6)*0.76;                             % control values
     % one row for one motor control points
-    
-    x = ctrl.T;
+
+    x = ctrl;
     % % setup and solve nonlinear programming problem
     problem.objective = @(x) hopping_objective(x,z0,p);     % create anonymous function that returns objective
     problem.nonlcon = @(x) hopping_constraints(x,z0,p);     % create anonymous function that returns nonlinear constraints
-    problem.x0 = [ctrl.T];                   % initial guess for decision variables
-    problem.lb = [-2*ones(size(ctrl.T))];     % lower bound on decision variables
-    problem.ub = [2*ones(size(ctrl.T))];     % upper bound on decision variables
+    problem.x0 = [ctrl];                   % initial guess for decision variables
+    problem.lb = [-2*ones(size(ctrl))];     % lower bound on decision variables
+    problem.ub = [2*ones(size(ctrl))];     % upper bound on decision variables
     problem.Aineq = []; problem.bineq = [];         % no linear inequality constraints
     problem.Aeq = []; problem.beq = [];             % no linear equality constraints
     problem.options = optimset('Display','iter');   % set options
