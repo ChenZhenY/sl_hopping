@@ -20,7 +20,7 @@ function f = hopping_objective(x,z0,p)
     % numerically integrate to the final height
     tf = p(end);
     ctrl = x;
-    [tout, zout, uout, indices] = hybrid_simulation(z0, ctrl, p, [0 tf]);
+    [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0, ctrl, p, [0 tf]);
     COM = COM_jumping_leg(zout,p);
     % f = -COM_end;                                           % negative of COM height
     % f = -max(COM(2,:));

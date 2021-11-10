@@ -24,7 +24,7 @@ function [cineq ceq] = hopping_constraints(x,z0,p)
 
     tf = p(end);
     ctrl = x;
-    [tout, zout, uout, indices] = hybrid_simulation(z0, ctrl, p, [0 tf]);
+    [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0, ctrl, p, [0 tf]);
     theta1 = zout(1,:); 
     theta2 = zout(2, :);
     COM = COM_jumping_leg(zout,p);
@@ -48,6 +48,7 @@ function [cineq ceq] = hopping_constraints(x,z0,p)
         -min(sw_Cy); ... % swinging leg does not contact floor
         -min(k_Cy); ... % knee does not contact floor
         -min(h_Cy);... % hip does not contact floor
+        max(slip_out);... % foot does not slip
         -(zout(4,end) - zout(4,1) - .1) ]; % leg moves forward in x direction
     
     ceq = [min(zout(3,:)) - max(zout(3,:))]; % swing leg angle stays fixed

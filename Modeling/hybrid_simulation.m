@@ -1,4 +1,4 @@
-function [tout, zout, uout, indices] = hybrid_simulation(z0,ctrlpts,p,tspan)
+function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrlpts,p,tspan)
 % Model hopping with swinging pendulum leg and fixed rotation
 %Inputs:
 % z0 - the initial state
@@ -16,7 +16,8 @@ function [tout, zout, uout, indices] = hybrid_simulation(z0,ctrlpts,p,tspan)
 %   the first phase (stance) ended
 % 0: stance
 % 1: flight
-% -1: illegal configuration
+% slip_out - vector of differences between fx and friction cone limits.
+% Positive values indicate slip.
 
     restitution_coeff = 0.;
     friction_coeff = 10; % 0.3 and 10
@@ -32,6 +33,7 @@ function [tout, zout, uout, indices] = hybrid_simulation(z0,ctrlpts,p,tspan)
     zout(:,1) = z0;
     uout = zeros(3,1);
     iphase_list = 1;
+    slip_out = 0;
     for i = 1:num_step-1
         t = tout(i);
         
@@ -41,14 +43,15 @@ function [tout, zout, uout, indices] = hybrid_simulation(z0,ctrlpts,p,tspan)
         [zout(6:10,i+1), slip] = discrete_impact_contact(zout(:,i+1), p, restitution_coeff, friction_coeff, ground_height);
         zout(1:5,i+1) = zout(1:5,i) + zout(6:10, i+1)*dt;
         uout(:,i+1) = u; 
+        slip_out(i+1) = slip;
         
         % do not let anything except the hopping for touch the ground
         pos = position_foot(zout(:, i+1),p);
         Cy = pos(2) - ground_height;
         
-        if slip % hopping leg slipped
-            iphase = -1;
-        elseif(Cy > 0 && iphase == 1) % switch to jump
+        % todo make array of slip values
+        
+        if(Cy > 0 && iphase == 1) % switch to jump
             iphase = 2;
         elseif(Cy <= 0 && iphase == 2) % switch to stance
             iphase = 1;
@@ -76,7 +79,7 @@ function [qdot, slip] = discrete_impact_contact(z,p,rest_coeff, fric_coeff, yC)
     vel = velocity_foot(z,p);
     Cy = pos(2)-yC;
     dCy = vel(2);
-    slip = false;
+    slip = 0; % difference between required horizontal force and closest friction cone bound (>0 means slip)
     
     % only update dq when constraints violated
     if Cy<0 && dCy<0 % hopping foot
@@ -95,12 +98,12 @@ function [qdot, slip] = discrete_impact_contact(z,p,rest_coeff, fric_coeff, yC)
         % update horizontal force
         Fcx = Acx*(0-Jcx*q_dot);
         if Fcx > fric_coeff*Fcy
+            slip = Fcx - fric_coeff*Fcy;
             Fcx = fric_coeff*Fcy;
-            slip = true;
         end
         if Fcx < -fric_coeff*Fcy
+            slip = Fcx - fric_coeff*Fcy;
             Fcx = -fric_coeff*Fcy;
-            slip = true;
         end
         qdot = q_dot + inv(M)*Jcx'*Fcx;
     else
