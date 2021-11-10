@@ -43,33 +43,15 @@ function [tout, zout, uout, indices] = hybrid_simulation(z0,ctrlpts,p,tspan)
         uout(:,i+1) = u; 
         
         % do not let anything except the hopping for touch the ground
-        pos = position_swinging_foot(zout(:, i+1),p);
-        vel = velocity_swinging_foot(zout(:, i+1),p);
+        pos = position_foot(zout(:, i+1),p);
         Cy = pos(2) - ground_height;
-        dCy = vel(2);
         
         if slip % hopping leg slipped
             iphase = -1;
-        elseif(zout(1, i+1) > 0 && iphase == 1) % jump
+        elseif(Cy > 0 && iphase == 1) % switch to jump
             iphase = 2;
-        elseif(Cy<0 && dCy<0) % swinging leg hit floor
-            iphase = -1;
-        else
-            pos = position_knee(zout(:, i+1),p);
-            vel = velocity_knee(zout(:, i+1),p);
-            Cy = pos(2) - ground_height;
-            dCy = vel(2);
-            if(Cy<0 && dCy<0) % knee hit floor
-                iphase = -1;
-            else
-                pos = position_hip(zout(:, i+1),p);
-                vel = velocity_hip(zout(:, i+1),p);
-                Cy = pos(2) - ground_height;
-                dCy = vel(2);
-                if(Cy<0 && dCy<0) % hip hit floor
-                    iphase = -1;
-                end
-            end
+        elseif(Cy <= 0 && iphase == 2) % switch to stance
+            iphase = 1;
         end
         iphase_list(i+1) = iphase;
     end
