@@ -16,7 +16,7 @@ setpath                                     % add AutoDerived, Modeling, and Vis
 % set to run optimization over hopping leg or over swing leg
 run_hopping = true;
 
-z0 = [0; pi/4; -pi/6; 0; 0; 0; 0; 0; 0; 0];    
+z0 = [0; pi/4; -pi/3; 0; 0; 0; 0; 0; 0; 0];    
 p = parameters();                           % get parameters from file
 pos_foot0 = position_foot(z0, p);  
 ground_height = pos_foot0(2);

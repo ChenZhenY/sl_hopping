@@ -49,27 +49,27 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrlpts,p,
         pos = position_foot(zout(:, i+1),p);
         Cy = pos(2) - ground_height;
         
-        % todo make array of slip values
-        
         if(Cy > 0 && iphase == 1) % switch to jump
             iphase = 2;
         elseif(Cy <= 0 && iphase == 2) % switch to stance
             iphase = 1;
         end
-        iphase_list(i+1) = iphase;
-    end
+        
+        iphase_list(i+1) = iphase;    
+    end % simulation loop
     
-    j=1; % keeps track of phase changes
-    indices = [0;0];
+    % TODO: fix the indices logic and determine how to use
+    j=1;
+    indices = 0;
     for i = 1:num_step-1
         if (iphase_list(i+1) == iphase_list(i))
-            indices(2, j) = indices(2, j)+1;
+            indices(j) = indices(j)+1;
         else
-            indices(1,j) = iphase_list(i); % grab id of phase that just ended
             j = j+1;
-            indices(2,j) = 0;
+            indices(j) = 0;
         end
     end
+    
 end
 
 %% Discrete Contact
