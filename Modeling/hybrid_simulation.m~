@@ -20,12 +20,11 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrlpts,p,
 % Positive values indicate slip.
 
     restitution_coeff = 0.;
-    friction_coeff = 10;    % 0.3 and 10
+    friction_coeff = 10; % 0.3 and 10
     ground_height = p(end-1);
-    tend = p(end);          %simulation time
-    ctrl.T = ctrlpts;       % control points + tf
-    ctrl.tf = tend;         % control time period(decide if throughout simulation)
-    ctrl.num = 2;           % control repeating number: how many repeat curves happen within simulation
+    tend = p(end);
+    ctrl.T = ctrlpts; % control points + tf
+    ctrl.tf = tend;   %control time period
     
     t0 = tspan(1); %tend = tspan(end);   % set initial and final times
     dt = 0.001;
@@ -138,16 +137,13 @@ end
 %% Control law of BezierCurve SISO
 % TODO: to be changed for three variables control
 function u = control_laws(t,z,ctrl,iphase)
+
     tf = ctrl.tf;
     ctrlpts = ctrl.T;
-    repeat_num = ctrl.num;
     
     if iphase ~= -1  
         for i=1:3
-            
-            timeslice = floor(tf/repeat_num);
-            t_control = mod(t,timeslice)/tf;
-            u(i,1) = BezierCurve(ctrlpts(i,:), t_control);% control at t instant, input is t/tf due to normalization demand within Bezier function
+            u(i,1) = BezierCurve(ctrlpts(i,:), t/tf);%control at t/tf instant
             %repeat control curve
             
         end

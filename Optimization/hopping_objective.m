@@ -26,9 +26,9 @@ function f = hopping_objective(x,z0,p)
     % f = -max(COM(2,:));
     
     
-    t0 = 0; tend = tf;   % set initial and final times
-    dt = 0.001;
-    num_step = floor((tend-t0)/dt);
+%    t0 = 0; tend = tf;   % set initial and final times
+%    dt = 0.001;
+%    num_step = floor((tend-t0)/dt);
 %     torque = zeros(1, num_step);
 %     for i = 1:num_step-1
 %         torque(i) = BezierCurve(ctrl.T, i*dt/ctrl.tf);
