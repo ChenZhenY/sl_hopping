@@ -16,7 +16,7 @@ setpath                                     % add AutoDerived, Modeling, and Vis
 % set to run optimization over hopping leg or over swing leg
 run_hopping = true;
 
-z0 = [-pi/3; pi/3; 0; 0; 0; 0; 0; 0; 0; 0];    
+z0 = [-pi/4; pi/2; 0; 0; 0; 0; 0; 0; 0; 0];    
 p = parameters();                           % get parameters from file
 pos_foot0 = position_foot(z0, p);  
 ground_height = pos_foot0(2);
@@ -30,7 +30,7 @@ p = [p; ground_height; tf];
 if run_hopping
     
 %     ctrl_rd = rand(2,4)*2;
-    ctrl = [.5 .5 1.0 .5 ; 1 .5 .5 0];                     % control values
+    ctrl = [-.5 .5 0 0.0 ; 1 .5 0 0];                     % control values
     %ctrl(1:3,1:3) = 0;
                                             % one row for one motor control points
 % optimization start                                            
