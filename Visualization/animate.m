@@ -12,7 +12,7 @@ function animate(tspan, x, p)
     h_title = title('t=0.0s');
     
     axis equal
-    x_min = -.2;
+    x_min = -.8;
     x_max = .2;
     axis([x_min x_max -.3 .1]*3); % -.2 .2 -.3 .1
     height = p(end-1);
