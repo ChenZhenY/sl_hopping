@@ -29,8 +29,8 @@ p = [p; ground_height; tf];
 %__________________________ run hopping leg_________________________________________
 if run_hopping
     
-%     ctrl_rd = rand(2,4)*2;
-    ctrl = [1.5 1.5 1.0 .5];                     % control values
+    ctrl_rd = rand(3,4)*2;
+    ctrl = ctrl_rd;                     % control values
     %ctrl(1:3,1:3) = 0;
                                             % one row for one motor control points
 % optimization start                                            
@@ -49,7 +49,7 @@ if run_hopping
 
 % optimization end 
     ctrl = x
-    [t, z, u, indices] = hybrid_simulation(z0,ctrl,p,[0 tf], 1); % run simulation
+    [t, z, u, indices] = hybrid_simulation(z0,ctrl,p,[0 tf]); % run simulation
 
 %_______________________________ run swinging leg_____________________________
 else
@@ -78,7 +78,7 @@ else
     % ctrl.tf = x(2);
     % ctrl.T = x(3:end)
 
-    [t, z, u, indices] = hybrid_simulation(z0,ctrl,p,[0 tf], 2); % run simulation
+    [t, z, u, indices] = hybrid_simulation(z0,ctrl,p,[0 tf]); % run simulation
 end
 
 %% Plot COM for your submissions
