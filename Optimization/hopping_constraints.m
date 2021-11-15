@@ -44,7 +44,8 @@ function [cineq ceq] = hopping_constraints(x,z0,p)
         h_Cy(i) = h_pos(2) - ground_height;        % hip height from ground
     end
     
-    cineq = [-theta2(:) + pi/6;... % joint limits
+    cineq = [...
+%         -theta2(:) + pi/6;... % joint limits
 %         theta1(:) + theta2(:)-2*pi/3;...
 %         theta2(:) - 2*pi/3;...
 %         -theta1(:) - pi/3;...
@@ -55,6 +56,6 @@ function [cineq ceq] = hopping_constraints(x,z0,p)
         -(zout(4,end) - zout(4,1) - .1) ]; % leg moves forward in x direction
     
     % ceq = [min(zout(3,:)) - max(zout(3,:))]; % swing leg angle stays fixed
-    ceq = [pos_leg(2), max(theta2), min(theta2)]; % y 
+    ceq = []; % y 
     
 end

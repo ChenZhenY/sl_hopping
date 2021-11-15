@@ -21,7 +21,7 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrlpts,p,
 % Positive values indicate slip.
 
     restitution_coeff = 0.;
-    friction_coeff = 10;    % 0.3 and 10
+    friction_coeff = .5;    % 0.3 and 10
     ground_height = p(end-1);
     tend = p(end);          %simulation time
     ctrl.T = ctrlpts;       % control points + tf

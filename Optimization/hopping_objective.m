@@ -37,5 +37,5 @@ function f = hopping_objective(x,z0,p)
 %     work = torque*torque.';
 %     f = work;                                         % minimize T^2 integral
 % f = -(zout(4,end) - zout(4,1));
-  f = -zout(5,end);  
+  f = -zout(4,end);  
 end
