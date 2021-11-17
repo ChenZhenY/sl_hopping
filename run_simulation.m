@@ -50,7 +50,9 @@ if run_hopping
     problem.nonlcon = @(x) hopping_constraints(x,z0,p);     % create anonymous function that returns nonlinear constraints
     problem.x0 = x;                   % initial guess for decision variables
     problem.lb = [-2*ones(size(x))];     % lower bound on decision variables
+    problem.lb(1) = 0;
     problem.ub = [2*ones(size(x))];     % upper bound on decision variables
+    problem.ub(1) = 2; % say max time 
     problem.Aineq = []; problem.bineq = [];         % no linear inequality constraints
     problem.Aeq = []; problem.beq = [];             % no linear equality constraints
     problem.options = optimset('Display','iter');   % set options
