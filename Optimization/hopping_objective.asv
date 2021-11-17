@@ -22,10 +22,16 @@ function f = hopping_objective(x,z0,p)
     ctrl = x; % todo: change
     ctrl = vertcat(x, zeros(1,size(ctrl,2)));
     [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0, ctrl, p, [0 tf],1);
+    pend_vector_begin = position_foot(zout(:,1),p) - position_mount(zout(:,1),p);
     pend_vector_end = position_foot(zout(:,end),p) - position_mount(zout(:,end),p);
     
     % find angles to the ground
     v = pend_vector_end / norm(pend_vector_end);
+    u = [1; 0; 0];
+    cos_theta = max(min(dot(u,pend_vector_begin)/(norm(u)*norm(pend_vector_begin)),1),-1);
+    touchdown_angle = real(acos(cos_theta));
+    cos_theta = max(min(dot(u,pend_vector_begin)/(norm(u)*norm(pend_vector_begin)),1),-1);
+    liftoff_angle = real(acos(cos_theta));
     
 %    t0 = 0; tend = tf;   % set initial and final times
 %    dt = 0.001;
@@ -40,6 +46,7 @@ function f = hopping_objective(x,z0,p)
 %   f = -zout(4,end);  
     end_vel = zout(end-1:end,end); % get x and y component velocities
     end_vel = vertcat(end_vel, [0]); % append z
-    f = -dot(v, end_vel); % minimize negative end velocity
+    f = -dot(v, end_vel);
+    f = f(end-1:end);
     
 end
