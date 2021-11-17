@@ -35,8 +35,7 @@ p = [p; ground_height; tf];
 if run_hopping
     
 %     ctrl_rd = rand(2,4)*2;
-    ctrl = [-1 0 -0.8 -0.6 1 0.6 2 0; 
-        0.2 -0.2 1 1 0.8 -0.4 -2 0];                     % control values
+    ctrl = [-.5 .5 0 0.0 ; 1 .5 0 0];                     % control values
     %ctrl(1:3,1:3) = 0;
                                             % one row for one motor control points
 % optimization start                                            
