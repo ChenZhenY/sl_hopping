@@ -148,7 +148,6 @@ matlabFunction(rC,'file',[directory 'position_knee'],'vars',{z p});
 matlabFunction(drC,'file',[directory 'velocity_knee'],'vars',{z p});
 matlabFunction(rB,'file',[directory 'position_hip'],'vars',{z p});
 matlabFunction(drB,'file',[directory 'velocity_hip'],'vars',{z p});
-matlabFunction(rO,'file',[directory 'position_mount'],'vars',{z p});
 matlabFunction(J ,'file',[directory 'jacobian_foot'],'vars',{z p});
 matlabFunction(dJ ,'file',[directory 'jacobian_dot_foot'],'vars',{z p});
 
