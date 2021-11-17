@@ -22,10 +22,10 @@ function [cineq ceq] = hopping_constraints(x,z0,p)
 
 % todo: add slip constraints
 
-    tf = p(end);
-    ctrl = x;
-    ctrl = vertcat(x, zeros(1,size(ctrl,2)));
-    [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0, ctrl, p, [0 tf],1);
+    tf = x(1);
+    ctrlpts = reshape(x(2:end),[2],[]);
+    ctrlpts = vertcat(ctrlpts, zeros(1,size(ctrlpts,2)));
+    [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0, ctrlpts, p, [0 tf],1);
     theta1 = zout(1,:); 
     theta2 = zout(2, :);
     COM = COM_jumping_leg(zout,p);

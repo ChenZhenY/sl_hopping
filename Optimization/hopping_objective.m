@@ -18,10 +18,10 @@ function f = hopping_objective(x,z0,p)
 % functions with ode45().
 
     % numerically integrate to the final height
-    tf = p(end);
-    ctrl = x;
-    ctrl = vertcat(x, zeros(1,size(ctrl,2)));
-    [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0, ctrl, p, [0 tf],1);
+    tf = x(1);
+    ctrlpts = reshape(x(2:end),[2],[]);
+    ctrlpts = vertcat(ctrlpts, zeros(1,size(ctrlpts,2)));
+    [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0, ctrlpts, p, [0 tf],1);
     COM = COM_jumping_leg(zout,p);
     % f = -COM_end;                                           % negative of COM height
     % f = -max(COM(2,:));
