@@ -16,8 +16,8 @@ setpath                                     % add AutoDerived, Modeling, and Vis
 % set to run optimization over hopping leg or over swing leg
 run_hopping = true;
 
-init_angle = 2*pi/3;
-init_length = 0.18;
+init_angle = pi/2;
+init_length = 0.15;
 
 [th1 th2] = initial_condition_convert(init_angle, init_length);
 
@@ -40,7 +40,7 @@ p = [p; ground_height; tf];
 if run_hopping
     
   %  ctrl_rd = rand(2,4)*2;
-    ctrl = [2 -3 1 0 ; -2 3 -4 0];                     % control values
+    ctrl = [1 1 ; 1 1];                     % control values
     %ctrl(1:3,1:3) = 0;
                                             % one row for one motor control points
 % optimization start                                            
