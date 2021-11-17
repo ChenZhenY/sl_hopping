@@ -16,11 +16,16 @@ setpath                                     % add AutoDerived, Modeling, and Vis
 % set to run optimization over hopping leg or over swing leg
 run_hopping = true;
 
-z0 = [-pi/3; pi/3; 0; 0; 0; 0; 0; 0; 0; 0];    
+init_angle = pi/3;
+init_length = 0.15;
+
+[th1 th2] = initial_condition_convert(init_angle, init_length);
+
+z0 = [th1; th2; 0; 0; 0; 0; 0; 0; 0; 0];    
 p = parameters();                           % get parameters from file
 pos_foot0 = position_foot(z0, p);  
 ground_height = pos_foot0(2);
-tf = 0.6;                                   %simulation time
+tf = 0.01;                                   %simulation time
 p = [p; ground_height; tf];
 
 % An equation has been added to dynamics_continuous and dynamics_discrete
@@ -30,7 +35,8 @@ p = [p; ground_height; tf];
 if run_hopping
     
 %     ctrl_rd = rand(2,4)*2;
-    ctrl = [1.5 1.5 1.0 .5 ; .5 .5 .5 0];                     % control values
+    ctrl = [-1 0 -0.8 -0.6 1 0.6 2 0; 
+        0.2 -0.2 1 1 0.8 -0.4 -2 0];                     % control values
     %ctrl(1:3,1:3) = 0;
                                             % one row for one motor control points
 % optimization start                                            
@@ -56,7 +62,7 @@ else
     % set guess
     tf = 1.0;     % 0.5                                   % simulation final time
     ctrl.tf = .4;    % 0.35                              % control time points
-    ctrl.T = [1.0 1.0 1.0];                               % control values
+    ctrl.T = [1.0 1.0 1.0];                                    % control values
 
     x = ctrl.T;
     % % % setup and solve nonlinear programming problem

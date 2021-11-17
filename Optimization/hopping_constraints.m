@@ -45,16 +45,16 @@ function [cineq ceq] = hopping_constraints(x,z0,p)
     end
     
     cineq = [-theta2(:) + pi/6;... % joint limits
-%         theta1(:) + theta2(:)-2*pi/3;...
-%         theta2(:) - 2*pi/3;...
-%         -theta1(:) - pi/3;...
+         theta1(:) + theta2(:)-2*pi/3;...
+         theta2(:) - 2*pi/3;...
+         -theta1(:) - pi/3;...
 %         -sw_Cy(:); ...            % swinging leg does not contact floor
-%         -k_Cy(:); ...             % knee does not contact floor
+         -k_Cy(:); ...             % knee does not contact floor
 %         -h_Cy(:);...              % hip does not contact floor
 %         slip_out(:);...           % foot does not slip
         -(zout(4,end) - zout(4,1) - .1) ]; % leg moves forward in x direction
-    
+
     % ceq = [min(zout(3,:)) - max(zout(3,:))]; % swing leg angle stays fixed
-    ceq = [pos_leg(2), max(theta2), min(theta2)]; % y 
-    
+    %ceq = [pos_leg(2)]; % y 
+    ceq = [];
 end
