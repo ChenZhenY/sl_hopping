@@ -1,9 +1,8 @@
 function [th1, th2] = initial_condition_convert(init_angle, init_length)
-
+% intro: convert SLIP angle and length of BE to joint angles
 % input: initial angle and length of BE
 % output: the corresponding joint anlge
-% note: the1 and the2 > 0, this function can be only used in landing
-% position.
+
 p = parameters();
 
 % x = p(19)+p(21); % OB + DE
@@ -21,10 +20,15 @@ p = parameters();
 AC = p(20);
 DE = p(21);
 costh2 = -(AC^2 + DE^2 - init_length^2)/(2*AC*DE);
-th2 = acos(costh2)
+th2 = acos(costh2);
 
 cos_th1_a = sin(th2)*AC/init_length;
-th1_a = acos(cos_th1_a);
-th1 = th1_a - init_angle
+if cos_th1_a >= 0
+   th1_a = acos(cos_th1_a);
+   th1 = th1_a - init_angle;
+elseif cos_th1_a <0
+   th1_a = -acos(cos_th1_a);
+   th1 = th1_a - init_angle;
+end
 
 end
