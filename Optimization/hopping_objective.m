@@ -24,7 +24,7 @@ function f = hopping_objective(x,z0,p)
     [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0, ctrlpts, p, [0 tf],1);
     COM = COM_jumping_leg(zout,p);
     % f = -COM_end;                                           % negative of COM height
-    % f = -max(COM(2,:));
+     f = -max(COM(1,:));
     
     pend_vector_end = position_foot(zout(:,end),p) - position_mount(zout(:,end),p);
     
@@ -41,9 +41,13 @@ function f = hopping_objective(x,z0,p)
 %     work = torque*torque.';
 %     f = work;                                         % minimize T^2 integral
 % f = -(zout(4,end) - zout(4,1));
+<<<<<<< HEAD
+  %f = -zout(4,end);  
+=======
 %   f = -zout(4,end);  
     end_vel = zout(end-1:end,end); % get x and y component velocities
     end_vel = vertcat(end_vel, [0]); % append z
     f = -dot(v, end_vel); % minimize negative end velocity
     
+>>>>>>> 4db284cad6079348bc2a99697caef2bfe7b40558
 end

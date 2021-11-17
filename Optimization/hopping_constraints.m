@@ -45,6 +45,7 @@ function [cineq ceq] = hopping_constraints(x,z0,p)
     % check if anything other than the hopping foot touches the ground
 
     sw_Cy = zeros(numel(tout),1); k_Cy = zeros(numel(tout),1); h_Cy = zeros(numel(tout),1);
+    
     for i = 1:numel(tout)
         sw_pos = position_swinging_foot(zout(:, i),p);
         sw_Cy(i) = sw_pos(2) - ground_height;      % foot height from ground
@@ -53,6 +54,20 @@ function [cineq ceq] = hopping_constraints(x,z0,p)
         h_pos = position_hip(zout(:, i),p);
         h_Cy(i) = h_pos(2) - ground_height;        % hip height from ground
     end
+<<<<<<< HEAD
+  
+    cineq = [...
+          -theta2(:) + pi/6;... % joint limits
+%          theta1(:) + theta2(:)-2*pi/3;...
+%          theta2(:) - 2*pi/3;...
+          -theta1(:) - pi/3;...
+%          -sw_Cy(:); ...            % swinging leg does not contact floor
+          -k_Cy(:); ...             % knee does not contact floor
+%          -h_Cy(:);...              % hip does not contact floor
+%          slip_out(:);...           % foot does not slip
+          -(zout(4,end) - zout(4,1) - .1) ]; % leg moves forward in x direction
+    
+=======
     
     cineq = [-theta2(:) + pi/6;... % joint limits
          theta1(:) + theta2(:)-2*pi/3;...
@@ -64,6 +79,7 @@ function [cineq ceq] = hopping_constraints(x,z0,p)
 %         slip_out(:);...           % foot does not slip
         -(zout(4,end) - zout(4,1) - .1) ]; % leg moves forward in x direction
 
+>>>>>>> 4db284cad6079348bc2a99697caef2bfe7b40558
     % ceq = [min(zout(3,:)) - max(zout(3,:))]; % swing leg angle stays fixed
     ceq = [touchdown_angle + liftoff_angle - pi]; % y 
     

@@ -25,7 +25,12 @@ z0 = [th1; th2; 0; 0; 0; 0; 0; 0; 0; 0];
 p = parameters();                           % get parameters from file
 pos_foot0 = position_foot(z0, p);  
 ground_height = pos_foot0(2);
+
+st = .5;                            %simulation time      
+tf = .5;                            %control time
+
 tf = 0.01;                                   %simulation time
+
 p = [p; ground_height; tf];
 
 % An equation has been added to dynamics_continuous and dynamics_discrete
@@ -34,8 +39,8 @@ p = [p; ground_height; tf];
 %__________________________ run hopping leg_________________________________________
 if run_hopping
     
-%     ctrl_rd = rand(2,4)*2;
-    ctrl = [-.5 .5 0 0.0 ; 1 .5 0 0];                     % control values
+  %  ctrl_rd = rand(2,4)*2;
+    ctrl = [2 -3 1 0 ; -2 3 -4 0];                     % control values
     %ctrl(1:3,1:3) = 0;
                                             % one row for one motor control points
 % optimization start                                            
@@ -57,6 +62,7 @@ if run_hopping
     ctrlpts = vertcat(ctrlpts, zeros(1,size(ctrlpts,2)));
     tf = x(1,1);
     [t, z, u, indices] = hybrid_simulation(z0,ctrlpts,p,[0 tf], 1); % run simulation
+
 
 %_______________________________ run swinging leg_____________________________
 else
@@ -118,7 +124,7 @@ title('Center of Mass Trajectory')
 % hold off
 % xlabel('time (s)')
 % ylabel('torque (Nm)')
-% title('Control Input Trajectory')
+% title(x'Control Input Trajectory')
 
 %%
 % Run the animation
