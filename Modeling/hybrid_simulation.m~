@@ -1,11 +1,10 @@
-function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrlpts,p,tspan, option)
+function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrlpts,p,tspan)
 % Model hopping with swinging pendulum leg and fixed rotation
 %Inputs:
 % z0 - the initial state
 % ctrl- control structure
 % p - simulation parameters
 % tspan - [t0 tf] where t0 is start time, tf is end time
-% option - 1 for hopping leg simulation, 2 for swinging leg
 % 
 % Outputs:
 % tout - vector of all time points
@@ -21,12 +20,11 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrlpts,p,
 % Positive values indicate slip.
 
     restitution_coeff = 0.;
-    friction_coeff = .5;    % 0.3 and 10
+    friction_coeff = 10; % 0.3 and 10
     ground_height = p(end-1);
-    tend = p(end);          %simulation time
-    ctrl.T = ctrlpts;       % control points + tf
-    ctrl.tf = tend;         % control time period(decide if throughout simulation)
-    ctrl.num = 2;           % control repeating number: how many repeat curves happen within simulation
+    tend = p(end);
+    ctrl.T = ctrlpts; % control points + tf
+    ctrl.tf = tend;   %control time period
     
     t0 = tspan(1); %tend = tspan(end);   % set initial and final times
     dt = 0.001;
@@ -42,7 +40,7 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrlpts,p,
         t = tout(i);
         
         iphase = iphase_list(i);
-        [dz, u] = dynamics_continuous(t,zout(:,i),ctrl,p,iphase, option);
+        [dz, u] = dynamics_continuous(t,zout(:,i),ctrl,p,iphase);
         zout(:,i+1) = zout(:,i) + dz*dt; % continuous dynamic determine status for contact determination
 
         [zout(6:10,i+1), slip] = discrete_impact_contact(zout(:,i+1),p, restitution_coeff,...
@@ -120,9 +118,9 @@ function [qdot, slip] = discrete_impact_contact(z,p,rest_coeff, fric_coeff, yC)
 end
 
 %% Continuous dynamics
-function [dz, u] = dynamics_continuous(t,z,ctrl,p,iphase, option)
+function [dz, u] = dynamics_continuous(t,z,ctrl,p,iphase)
 
-    u = control_laws(t,z,ctrl,iphase, option);  % get 3 motor torque controls at this instant
+    u = control_laws(t,z,ctrl,iphase);  % get 3 motor torque controls at this instant
     % TODO: need a test strategy
     % TODO: we don't handle constraints Fc here?
     % u = [0; 0; 0];
@@ -138,22 +136,14 @@ end
 
 %% Control law of BezierCurve SISO
 % TODO: to be changed for three variables control
-function u = control_laws(t,z,ctrl,iphase, option)
+function u = control_laws(t,z,ctrl,iphase)
+
     tf = ctrl.tf;
     ctrlpts = ctrl.T;
-    repeat_num = ctrl.num;
-    if option == 1 % optimizing hopping
-        motors = 1:2;
-    elseif option == 2 % optimizing swinging
-        motors = 3;
-    end
     
     if iphase ~= -1  
-        for i=motors
-            
-            timeslice = floor(tf/repeat_num);
-            t_control = mod(t,timeslice)/tf;
-            u(i,1) = BezierCurve(ctrlpts(i,:), t_control);% control at t instant, input is t/tf due to normalization demand within Bezier function
+        for i=1:3
+            u(i,1) = BezierCurve(ctrlpts(i,:), t/tf);%control at t/tf instant
             %repeat control curve
             
         end
@@ -170,7 +160,4 @@ function u = control_laws(t,z,ctrl,iphase, option)
         u = -k*(th-thd) - b*dth;% apply PD control
     end
 
-    if size(u,1) == 2
-        u = vertcat(u,zeros(1,size(u,2)));
-    end
 end
