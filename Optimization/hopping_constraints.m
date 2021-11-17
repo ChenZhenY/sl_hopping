@@ -32,6 +32,16 @@ function [cineq ceq] = hopping_constraints(x,z0,p)
     ground_height = p(end-1);
     pos_leg = position_foot(zout(:,end),p);
     
+    pend_vector_begin = position_foot(zout(:,1),p) - position_mount(zout(:,1),p);
+    pend_vector_end = position_foot(zout(:,end),p) - position_mount(zout(:,end),p);
+    
+    % find angles to the ground
+    u = [1; 0; 0];
+    cos_theta = max(min(dot(u,pend_vector_begin)/(norm(u)*norm(pend_vector_begin)),1),-1);
+    touchdown_angle = real(acos(cos_theta));
+    cos_theta = max(min(dot(u,pend_vector_begin)/(norm(u)*norm(pend_vector_begin)),1),-1);
+    liftoff_angle = real(acos(cos_theta));
+    
     % check if anything other than the hopping foot touches the ground
 
     sw_Cy = zeros(numel(tout),1); k_Cy = zeros(numel(tout),1); h_Cy = zeros(numel(tout),1);
@@ -56,6 +66,6 @@ function [cineq ceq] = hopping_constraints(x,z0,p)
         -(zout(4,end) - zout(4,1) - .1) ]; % leg moves forward in x direction
     
     % ceq = [min(zout(3,:)) - max(zout(3,:))]; % swing leg angle stays fixed
-    ceq = []; % y 
+    ceq = [touchdown_angle + liftoff_angle - pi]; % y 
     
 end

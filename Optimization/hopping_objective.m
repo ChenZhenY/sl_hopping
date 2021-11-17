@@ -26,6 +26,10 @@ function f = hopping_objective(x,z0,p)
     % f = -COM_end;                                           % negative of COM height
     % f = -max(COM(2,:));
     
+    pend_vector_end = position_foot(zout(:,end),p) - position_mount(zout(:,end),p);
+    
+    % find angles to the ground
+    v = pend_vector_end / norm(pend_vector_end);
     
 %    t0 = 0; tend = tf;   % set initial and final times
 %    dt = 0.001;
@@ -37,5 +41,9 @@ function f = hopping_objective(x,z0,p)
 %     work = torque*torque.';
 %     f = work;                                         % minimize T^2 integral
 % f = -(zout(4,end) - zout(4,1));
-  f = -zout(4,end);  
+%   f = -zout(4,end);  
+    end_vel = zout(end-1:end,end); % get x and y component velocities
+    end_vel = vertcat(end_vel, [0]); % append z
+    f = -dot(v, end_vel); % minimize negative end velocity
+    
 end
