@@ -46,4 +46,5 @@ function f = hopping_objective(x,z0,p)
     end_vel = vertcat(end_vel, [0]); % append z
     f = -dot(v, end_vel); % minimize negative end velocity
     
+>>>>>>> 4db284cad6079348bc2a99697caef2bfe7b40558
 end
