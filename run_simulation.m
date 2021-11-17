@@ -16,11 +16,21 @@ setpath                                     % add AutoDerived, Modeling, and Vis
 % set to run optimization over hopping leg or over swing leg
 run_hopping = true;
 
-z0 = [-pi/4; pi/2; 0; 0; 0; 0; 0; 0; 0; 0];    
+init_angle = pi/3;
+init_length = 0.15;
+
+[th1 th2] = initial_condition_convert(init_angle, init_length);
+
+z0 = [th1; th2; 0; 0; 0; 0; 0; 0; 0; 0];    
 p = parameters();                           % get parameters from file
 pos_foot0 = position_foot(z0, p);  
 ground_height = pos_foot0(2);
-tf = 0.6;                                   %simulation time
+
+st = .5;                            %simulation time      
+tf = .5;                            %control time
+
+tf = 0.01;                                   %simulation time
+
 p = [p; ground_height; tf];
 
 % An equation has been added to dynamics_continuous and dynamics_discrete
@@ -29,26 +39,26 @@ p = [p; ground_height; tf];
 %__________________________ run hopping leg_________________________________________
 if run_hopping
     
-%     ctrl_rd = rand(2,4)*2;
-    ctrl = [-.5 .5 0 0.0 ; 1 .5 0 0];                     % control values
+  %  ctrl_rd = rand(2,4)*2;
+    ctrl = [2 -3 1 0 ; -2 3 -4 0];                     % control values
     %ctrl(1:3,1:3) = 0;
-                                            % one row for one motor control points
-% optimization start                                            
-    x = ctrl;
-    % % setup and solve nonlinear programming problem
-    problem.objective = @(x) hopping_objective(x,z0,p);     % create anonymous function that returns objective
-    problem.nonlcon = @(x) hopping_constraints(x,z0,p);     % create anonymous function that returns nonlinear constraints
-    problem.x0 = [ctrl];                   % initial guess for decision variables
-    problem.lb = [-2*ones(size(ctrl))];     % lower bound on decision variables
-    problem.ub = [2*ones(size(ctrl))];     % upper bound on decision variables
-    problem.Aineq = []; problem.bineq = [];         % no linear inequality constraints
-    problem.Aeq = []; problem.beq = [];             % no linear equality constraints
-    problem.options = optimset('Display','iter');   % set options
-    problem.solver = 'fmincon';                     % required
-    x = fmincon(problem);                           % solve nonlinear programming problem
-
-% optimization end 
-    ctrl = x
+%                                             % one row for one motor control points
+% % optimization start                                            
+%     x = ctrl;
+%     % % setup and solve nonlinear programming problem
+%     problem.objective = @(x) hopping_objective(x,z0,p);     % create anonymous function that returns objective
+%     problem.nonlcon = @(x) hopping_constraints(x,z0,p);     % create anonymous function that returns nonlinear constraints
+%     problem.x0 = [ctrl];                   % initial guess for decision variables
+%     problem.lb = [-2*ones(size(ctrl))];     % lower bound on decision variables
+%     problem.ub = [2*ones(size(ctrl))];     % upper bound on decision variables
+%     problem.Aineq = []; problem.bineq = [];         % no linear inequality constraints
+%     problem.Aeq = []; problem.beq = [];             % no linear equality constraints
+%     problem.options = optimset('Display','iter');   % set options
+%     problem.solver = 'fmincon';                     % required
+%     x = fmincon(problem);                           % solve nonlinear programming problem
+%     ctrl = x
+% % optimization end 
+   
     [t, z, u, indices] = hybrid_simulation(z0,ctrl,p,[0 tf], 1); % run simulation
 
 %_______________________________ run swinging leg_____________________________
@@ -56,7 +66,7 @@ else
     % set guess
     tf = 1.0;     % 0.5                                   % simulation final time
     ctrl.tf = .4;    % 0.35                              % control time points
-    ctrl.T = [1.0 1.0 1.0];                               % control values
+    ctrl.T = [1.0 1.0 1.0];                                    % control values
 
     x = ctrl.T;
     % % % setup and solve nonlinear programming problem
@@ -111,7 +121,7 @@ title('Center of Mass Trajectory')
 % hold off
 % xlabel('time (s)')
 % ylabel('torque (Nm)')
-% title('Control Input Trajectory')
+% title(x'Control Input Trajectory')
 
 %%
 % Run the animation

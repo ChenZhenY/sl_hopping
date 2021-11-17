@@ -26,7 +26,7 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrlpts,p,
     tend = p(end);          %simulation time
     ctrl.T = ctrlpts;       % control points + tf
     ctrl.tf = tend;         % control time period(decide if throughout simulation)
-    ctrl.num = 2;           % control repeating number: how many repeat curves happen within simulation
+    ctrl.num = 1;           % control repeating number: how many repeat curves happen within simulation
     
     t0 = tspan(1); %tend = tspan(end);   % set initial and final times
     dt = 0.001;
@@ -151,8 +151,8 @@ function u = control_laws(t,z,ctrl,iphase, option)
     if iphase ~= -1  
         for i=motors
             
-            timeslice = floor(tf/repeat_num);
-            t_control = mod(t,timeslice)/tf;
+            timeslice = tf/repeat_num;
+            t_control = repeat_num*mod(t,timeslice)/tf;
             u(i,1) = BezierCurve(ctrlpts(i,:), t_control);% control at t instant, input is t/tf due to normalization demand within Bezier function
             %repeat control curve
             
