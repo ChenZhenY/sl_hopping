@@ -34,8 +34,8 @@ p = [p; ground_height; tf];
 %__________________________ run hopping leg_________________________________________
 if run_hopping
     
-%     ctrl_rd = rand(2,4)*2;
-    ctrl = [-.5 .5 0 0.0 ; 1 .5 0 0];                     % control values
+  %  ctrl_rd = rand(2,4)*2;
+    ctrl = [1 1 ; 1 1];                     % control values
     %ctrl(1:3,1:3) = 0;
                                             % one row for one motor control points
 % optimization start                                            
@@ -43,9 +43,11 @@ if run_hopping
     % % setup and solve nonlinear programming problem
     problem.objective = @(x) hopping_objective(x,z0,p);     % create anonymous function that returns objective
     problem.nonlcon = @(x) hopping_constraints(x,z0,p);     % create anonymous function that returns nonlinear constraints
-    problem.x0 = [ctrl];                   % initial guess for decision variables
-    problem.lb = [-2*ones(size(ctrl))];     % lower bound on decision variables
-    problem.ub = [2*ones(size(ctrl))];     % upper bound on decision variables
+    problem.x0 = x;                   % initial guess for decision variables
+    problem.lb = [-2*ones(size(x))];     % lower bound on decision variables
+    problem.lb(1) = 0;
+    problem.ub = [2*ones(size(x))];     % upper bound on decision variables
+    problem.ub(1) = 2; % say max time 
     problem.Aineq = []; problem.bineq = [];         % no linear inequality constraints
     problem.Aeq = []; problem.beq = [];             % no linear equality constraints
     problem.options = optimset('Display','iter');   % set options
