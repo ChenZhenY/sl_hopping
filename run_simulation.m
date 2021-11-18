@@ -16,7 +16,7 @@ setpath                                     % add AutoDerived, Modeling, and Vis
 % set to run optimization over hopping leg or over swing leg
 run_hopping = true;
 
-init_angle = 2*pi/3;
+init_angle = pi/3;
 init_length = 0.18;
 
 [th1 th2] = initial_condition_convert(init_angle, init_length);
