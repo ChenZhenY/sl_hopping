@@ -162,8 +162,17 @@ function u = control_laws(t,z,ctrl,iphase, option)
         % PD Control in flight
         th = z(1:3);            % leg angle
         dth = z(6:8);           % leg angular velocity
-
-        thd = pi/4;             % desired leg angle
+        com = COM_jumping_leg(z,p); %COM position&speed with respect to O
+        
+        COM_yvel = z(10) + com(4); %z(10) is y axis velocity of O
+        %flight time
+        t_fly = 2*COM_yvel/g;
+        t_control = t/t_fly;
+        %control mid-phase slip length
+        mid_l = 0.12;  
+        %calculate desired joint angle
+        thd = flight_jointcontrol(th,mid_l,t_control)
+        %thd = pi/4;             % desired leg angle
         k = 5;                  % stiffness (N/rad)
         b = .5;                 % damping (N/(rad/s))
 

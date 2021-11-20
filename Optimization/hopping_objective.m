@@ -24,7 +24,7 @@ function f = hopping_objective(x,z0,p)
     [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0, ctrl, p, [0 tf],1);
     COM = COM_jumping_leg(zout,p);
     % f = -COM_end;                                           % negative of COM height
-    % f = -max(COM(2,:));
+     f = -max(COM(2,:));
     
     
 %    t0 = 0; tend = tf;   % set initial and final times
@@ -40,6 +40,6 @@ function f = hopping_objective(x,z0,p)
 %   f = -zout(4,end);  
     end_vel = zout(end-1:end,end); % get x and y component velocities
     end_vel = vertcat(end_vel, [0]); % append z
-    f = -dot(v, end_vel); % minimize negative end velocity
+   % f = -dot(end_vel, end_vel);        % minimize negative end velocity
     
 end

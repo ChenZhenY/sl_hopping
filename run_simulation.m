@@ -25,7 +25,7 @@ z0 = [th1; th2; 0; 0; 0; 0; 0; 0; 0; 0];
 p = parameters();                           % get parameters from file
 pos_foot0 = position_foot(z0, p);  
 ground_height = pos_foot0(2);
-tf = 0.01;                                   %simulation time
+tf = 1;                                   %simulation time
 p = [p; ground_height; tf];
 
 % An equation has been added to dynamics_continuous and dynamics_discrete
