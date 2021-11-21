@@ -3,8 +3,7 @@ function animate_simple(t,z,p, speed)
 
 
     axis([-.2 .2 -.2 1])
-    height = p(end);
-    h_ground = plot([-1 1],[height height],'k-','LineWidth',5);
+    h_ground = plot([-1 1],[0 0],'k-','LineWidth',5);
     hold on
     h_leg    = plot([0],[0],'-o',...
                 'LineWidth',3,...

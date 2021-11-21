@@ -8,6 +8,4 @@
 addpath([pwd '/Modeling'])
 addpath([pwd '/Visualization'])
 addpath([pwd '/AutoDerived'])
-addpath([pwd '/Optimization'])
-% Valerie: add casadi to path
-% addpath('C:\Program Files\MATLAB\R2021a\casadi-windows-matlabR2016a-v3.5.5')
+addpath([pwd '/casadi'])
