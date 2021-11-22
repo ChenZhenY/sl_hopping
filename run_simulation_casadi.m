@@ -35,7 +35,10 @@ option = 1;
 init_angle = pi/3;
 init_length = 0.18;
 [th1, th2] = initial_condition_convert(init_angle, init_length);
+% first guess continuous hopping
 z0 = [th1; th2; 0; 0; 0; 0; 0; 0; 0.3; -0.3*1.732];    
+% for continuous hopping
+% z0 = [th1; th2; 0; 0; 0; 0; 0; 0; 0.7256; -1.4820];
 
 p = parameters();                           % get parameters from file
 pos_foot0 = position_foot(z0, p);  
@@ -67,8 +70,8 @@ opti.subject_to(ctrl.tf <= 0.6);
 opti.subject_to(ctrl.T(:) >= -2);
 opti.subject_to(ctrl.T(:) <= 2 );
 
-% make sure lift off with velocity angle of 45 (~1.732 rad)
-diff_ang = COM(4, N.ctrl) - 1.732*COM(3, N.ctrl);
+% make sure lift off with velocity angle of 
+diff_ang = COM(4, N.ctrl) - tan(pi/3)*COM(3, N.ctrl);
 opti.subject_to(diff_ang == 0);
 
 % Leg angle must stay within bounds
@@ -81,7 +84,7 @@ for i = 1:N.ctrl
     opti.subject_to(zout(3,i) <= pi/2);
     opti.subject_to(zout(3,i) >= -pi/2);
     
-    % TODO: all joints above the ground (not working now)
+    % all joints above the ground
     sw_pos = position_swinging_foot(zout(:, i),p);
     sw_Cy = sw_pos(2) - ground_height;      % foot height from ground
     k_pos = position_knee(zout(:, i),p);
@@ -94,10 +97,8 @@ for i = 1:N.ctrl
     
     
     if i>1
-        % always moving forward along x
-        opti.subject_to(zout(4,i)-zout(4,i-1) > 0);
-        %  no slipping, fail in discrete_contact_dynamic
-        opti.subject_to(slip(i-1) - 2.5 <= 0); 
+        % always moving forward along x TODO; x dot
+        opti.subject_to(zout(9,i) > 0);
     end
 end
 
@@ -121,8 +122,12 @@ opti.solver('ipopt',p_opts);
 % of your optimization variables
 
 % Initial guess
-opti.set_initial(ctrl.tf,0.15);
-opti.set_initial(ctrl.T,[0. 1.0 1.0 0; 1.0 1.0 1.0 0]);
+% opti.set_initial(ctrl.tf,0.35);
+% opti.set_initial(ctrl.T,[1 1.0 .5 0; 2.0 -1.0 .5 1]);
+% setting to optimal solution we've solved for
+opti.set_initial(ctrl.tf,0.2383);
+opti.set_initial(ctrl.T,[-0.7226   -0.0033   -2.0000    2.0000
+                  1.8161   -2.0000   -2.0000   -2.0000]);
 
 % Solve the Optimization
 sol = opti.solve();
