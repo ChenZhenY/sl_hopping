@@ -9,7 +9,7 @@ function [tout,zout,uout,slip] = stance_simulation_casadi(z0,ctrl,p,N,option)
     
     % simulation parameters
     restitution_coeff = 0.;
-    friction_coeff = .5;    % 0.3 and 10
+    friction_coeff = 1.5;    % 0.3 and 10
     ground_height = p(end);
 
     % Declare casadi symbolic variables
@@ -64,7 +64,8 @@ function [qdot, slip] = discrete_impact_contact(z,p,rest_coeff, fric_coeff, yC)
     q_dot = dq + inv(M)*Jcy'*Fcy;
     % update horizontal force
     Fcx = Acx*(0-Jcx*q_dot);
-    slip = Fcx - fric_coeff*Fcy;
+    slip = abs(Fcx) - fric_coeff*Fcy; 
+%     Fcx = min(max(Fcx, - fric_coeff*Fcy), fric_coeff*Fcy);
     qdot = q_dot + inv(M)*Jcx'*Fcx;
  
 end

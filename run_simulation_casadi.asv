@@ -97,7 +97,7 @@ for i = 1:N.ctrl
         % always moving forward along x
         opti.subject_to(zout(4,i)-zout(4,i-1) > 0);
         %  no slipping, fail in discrete_contact_dynamic
-        opti.subject_to(slip(i-1) - 2.5 <= 0); 
+        opti.subject_to(slip(i-1) <= 0); % no slip
     end
 end
 
@@ -134,11 +134,6 @@ optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 
 [t z u indices] = hybrid_simulation_hop(z0,optimal_ctrl,p,[0 tf],option); % run simulation
-
-% current optimal:
-% optimal_ctrl.tf = 0.2383
-% optimal_ctrl.T = [-0.7226   -0.0033   -2.0000    2.0000
-%                   1.8161   -2.0000   -2.0000   -2.0000]
 
 figure(1)
 COM = COM_jumping_leg(z,p);
