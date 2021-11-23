@@ -13,3 +13,14 @@ t = linspace(0,0.6,60);
 plot(t,thd_2_array)
 hold on;
 plot(t,thd_1_array);
+
+p = parameters();  
+p = [p; ground_height];
+z = vertcat(thd_1_array, thd_2_array);
+for i =1:8
+    size(z)
+    size( zeros(1,60))
+    z = vertcat(z, zeros(1,60));
+end
+foot = position_foot(z,p);
+plot(foot(1,:), foot(2,:));

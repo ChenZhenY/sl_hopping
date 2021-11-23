@@ -29,7 +29,8 @@ ctrl.T  = opti.variable(2, num_ctrlpts); % Control values
 % Time discretization
 N.ctrl   = 50; % number of dynamics timesteps where ctrl is applied
 % only for hopping leg
-option = 1;
+option.leg = 1;
+option.mid_l = .12;
 
 % Set parameters
 init_angle = pi/3;
@@ -134,7 +135,7 @@ sol = opti.solve();
 
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
 % Parse solution
-tf = sol.value(ctrl.tf)+0.3;          % simulation final time, no flight
+tf = sol.value(ctrl.tf)+0.6;          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 

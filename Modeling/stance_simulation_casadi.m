@@ -5,7 +5,7 @@ function [tout,zout,uout,slip] = stance_simulation_casadi(z0,ctrl,p,N,option)
 % ctrl- control structure, which will be optimized
 % p - simulation parameters
 % N - number of dynamics timesteps where ctrl is applied
-% option - 1 for hopping leg simulation, 2 for swinging leg
+% option.leg - 1 for hopping leg simulation, 2 for swinging leg
     
     % simulation parameters
     restitution_coeff = 0.;
@@ -91,10 +91,10 @@ function u = control_laws(t,ctrl,option)
 
     ctrlpts = ctrl.T;
     u = casadi.MX(zeros(3,1));
-    if option == 1 % optimizing hopping
+    if option.leg == 1 % optimizing hopping
         u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
         u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
-    elseif option == 2 % optimizing swinging
+    elseif option.leg == 2 % optimizing swinging
         u(3) = BezierCurve(ctrlpts(3,:), t/ctrl.tf);
     end
     
