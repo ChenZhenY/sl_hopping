@@ -69,10 +69,10 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrl,p,tsp
             com = COM_jumping_leg(zout(:, i+1),p); %COM position & speed with respect to O
             t_flight = 2*com(4)/g;
         elseif(Cy <= 0 && iphase == 2) % switch to stance
-%             iphase = 1;
-%             t_phase_start = t_global;
-%             disp('iphase == 1');
-%             disp(t_phase_start);
+            iphase = 1;
+            t_phase_start = t_global;
+            disp('iphase == 1');
+            disp(t_phase_start);
         end
         
         iphase_list(i+1) = iphase;    
@@ -168,19 +168,19 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight)
         dth = z(6:8);           % joint angular velocities
 %         COM_yvel = z(10) + com(4); %z(10) is y axis velocity of O
         t_control = t/t_flight;
-        if t > t_flight
-            u = zeros(3,1);
-        else
-            %control mid-phase slip length
-            %calculate desired joint angle
-            thd = flight_trajectory(th,option.mid_l,t_control);
-            if option.leg == 1
-                thd = vertcat(thd, [0]);
-            end
-            k = 5;                  % stiffness (N/rad)
-            b = .5;                 % damping (N/(rad/s))
-            u = -k*(th-thd) - b*dth;% apply PD control
+%         if t > t_flight
+%             u = zeros(3,1);
+%         else
+        %control mid-phase slip length
+        %calculate desired joint angle
+        thd = flight_trajectory(th,option.mid_l,t_control);
+        if option.leg == 1
+            thd = vertcat(thd, [0]);
         end
+        k = 5;                  % stiffness (N/rad)
+        b = .5;                 % damping (N/(rad/s))
+        u = -k*(th-thd) - b*dth;% apply PD control
+%         end
 
     end
 end
