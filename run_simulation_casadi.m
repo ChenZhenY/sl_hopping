@@ -37,7 +37,7 @@ init_angle = pi/3;
 init_length = 0.18;
 [th1, th2] = initial_condition_convert(init_angle, init_length);
 % first guess continuous hopping
-z0 = [th1; th2; 0; 0; 0; 0; 0; 0; 0.3; -0.3*1.732];    
+z0 = [th1; th2; 0; 0; 0; 0; 0; 0; 0.35; -0.35*tan(init_angle)];    
 % for continuous hopping
 % z0 = [th1; th2; 0; 0; 0; 0; 0; 0; 0.7256; -1.4820];
 
@@ -58,8 +58,8 @@ p = [p; ground_height];
 
 % Maximize the COM velocity at takeoff
 COM = COM_jumping_leg(zout,p); 
-opti.minimize(-COM(4,N.ctrl)); % maxmize the y velocity of final time
-
+% opti.minimize(-COM(4,N.ctrl)); % maxmize the y velocity of final time
+opti.minimize(-zout(10, N.ctrl));
 
 %% Step 2: Add constraints
 % Adding constraints is likewise very simple, just use the
@@ -72,7 +72,8 @@ opti.subject_to(ctrl.T(:) >= -2);
 opti.subject_to(ctrl.T(:) <= 2 );
 
 % make sure lift off with velocity angle of 
-diff_ang = COM(4, N.ctrl) - tan(pi/3)*COM(3, N.ctrl);
+% diff_ang = COM(4, N.ctrl) - tan(init_angle)*COM(3, N.ctrl);
+diff_ang = zout(10, N.ctrl) - tan(init_angle)*zout(9, N.ctrl);
 opti.subject_to(diff_ang == 0);
 
 % Leg angle must stay within bounds
@@ -126,7 +127,7 @@ opti.solver('ipopt',p_opts);
 % opti.set_initial(ctrl.tf,0.35);
 % opti.set_initial(ctrl.T,[1 1.0 .5 0; 2.0 -1.0 .5 1]);
 % setting to optimal solution we've solved for
-opti.set_initial(ctrl.tf,0.2383);
+opti.set_initial(ctrl.tf,0.2383); % 2383
 opti.set_initial(ctrl.T,[-0.7226   -0.0033   -2.0000    2.0000
                   1.8161   -2.0000   -2.0000   -2.0000]);
 
@@ -135,10 +136,12 @@ sol = opti.solve();
 
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
 % Parse solution
-tf = sol.value(ctrl.tf)+0.6;          % simulation final time, no flight
+tf = sol.value(ctrl.tf);          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
-
+% 
+% z0(9) = 0.9;
+% z0(10) = -0.5;
 option.mid_l = .06;
 [t z u indices] = hybrid_simulation_hop(z0,optimal_ctrl,p,[0 tf],option); % run simulation
 

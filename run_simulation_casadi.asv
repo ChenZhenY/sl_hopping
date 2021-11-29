@@ -58,8 +58,8 @@ p = [p; ground_height];
 
 % Maximize the COM velocity at takeoff
 COM = COM_jumping_leg(zout,p); 
-opti.minimize(-COM(4,N.ctrl)); % maxmize the y velocity of final time
-
+% opti.minimize(-COM(4,N.ctrl)); % maxmize the y velocity of final time
+opti.minimize(-zout(9));
 
 %% Step 2: Add constraints
 % Adding constraints is likewise very simple, just use the
@@ -72,7 +72,8 @@ opti.subject_to(ctrl.T(:) >= -2);
 opti.subject_to(ctrl.T(:) <= 2 );
 
 % make sure lift off with velocity angle of 
-diff_ang = COM(4, N.ctrl) - tan(pi/3)*COM(3, N.ctrl);
+%diff_ang = COM(4, N.ctrl) - tan(pi/3)*COM(3, N.ctrl);
+diff_ang = zout(9, N.ctrl) - 
 opti.subject_to(diff_ang == 0);
 
 % Leg angle must stay within bounds
@@ -135,11 +136,11 @@ sol = opti.solve();
 
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
 % Parse solution
-tf = sol.value(ctrl.tf)+0.6;          % simulation final time, no flight
+tf = sol.value(ctrl.tf);          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 
-
+option.mid_l = .06;
 [t z u indices] = hybrid_simulation_hop(z0,optimal_ctrl,p,[0 tf],option); % run simulation
 
 % current optimal:
@@ -176,7 +177,6 @@ title('Center of Mass Vel. Trajectory')
 % title('Control Input Trajectory')
 % axis([0 0.45 0 2]);
 
-%%
 % Run the animation
 figure(3)                          % get the coordinates of the points to animate
 speed = .25;                                 % set animation speed
