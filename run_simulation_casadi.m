@@ -139,6 +139,7 @@ tf = sol.value(ctrl.tf)+0.6;          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 
+option.mid_l = .06;
 [t z u indices] = hybrid_simulation_hop(z0,optimal_ctrl,p,[0 tf],option); % run simulation
 
 % current optimal:
@@ -175,7 +176,6 @@ title('Center of Mass Vel. Trajectory')
 % title('Control Input Trajectory')
 % axis([0 0.45 0 2]);
 
-%%
 % Run the animation
 figure(3)                          % get the coordinates of the points to animate
 speed = .25;                                 % set animation speed
