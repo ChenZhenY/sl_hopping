@@ -38,16 +38,18 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrl,p,tsp
     slip_out = 0;
     t_phase_start = 0;
     t_flight = 0; % duration of flight phase from phase start time (relative time)
+    the_begin = zeros(3,1); % send the state at phase change (from stance2flight) to control_law
 
+    
     % start simulation yay
     for i = 1:num_step-1
         t_global = tout(i);
         t_relative = t_global - t_phase_start;
         
         iphase = iphase_list(i);
-        [dz, u] = dynamics_continuous(t_relative,zout(:,i),ctrl,p,iphase, option, t_flight);
+        [dz, u] = dynamics_continuous(t_relative,zout(:,i),ctrl,p,iphase, option, t_flight, the_begin);
         zout(:,i+1) = zout(:,i) + dz*dt; % continuous dynamic determine status for contact determination
-
+            
         [zout(6:10,i+1), slip] = discrete_impact_contact(zout(:,i+1),p, restitution_coeff,...
             friction_coeff, ground_height); %determine contact or not
         
@@ -59,8 +61,11 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrl,p,tsp
         pos = position_foot(zout(:, i+1),p);
         Cy = pos(2) - ground_height;
         % determine phase
+        indices = 0;
         if(Cy > 0 && iphase == 1)      % switch to jump
             iphase = 2;
+            indices = 1;
+            the_begin = zout(1:3);
             t_phase_start = t_global;
             disp('iphase == 2');
             disp(t_phase_start);
@@ -132,9 +137,9 @@ function [qdot, slip] = discrete_impact_contact(z,p,rest_coeff, fric_coeff, yC)
 end
 
 %% Continuous dynamics
-function [dz, u] = dynamics_continuous(t,z,ctrl,p,iphase, option,  t_flight)
+function [dz, u] = dynamics_continuous(t,z,ctrl,p,iphase, option, t_flight, the_begin)
 
-    u = control_laws(t, z, ctrl, iphase, p, option, t_flight);  % get 3 motor torque controls at this instant
+    u = control_laws(t, z, ctrl, iphase, p, option, t_flight, the_begin);  % get 3 motor torque controls at this instant
     % TODO: need a test strategy
     % TODO: we don't handle constraints Fc here?
     % u = [0; 0; 0];
@@ -150,7 +155,7 @@ end
 
 %% Control law of BezierCurve SISO
 % TODO: to be changed for three variables control
-function u = control_laws(t,z,ctrl,iphase, p, option, t_flight)
+function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
     
     if iphase == 1 % stance
         ctrlpts = ctrl.T;
@@ -163,17 +168,22 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight)
         end
     else
         % PD Control in flight
+%         global th_begin;
+%         if indices == 1
+%            th_begin = z(1:3)            % joint angles
+%         end
         
-        th = z(1:3);            % joint angles
-        dth = z(6:8);           % joint angular velocities
 %         COM_yvel = z(10) + com(4); %z(10) is y axis velocity of O
-        t_control = t/t_flight;
+        
 %         if t > t_flight
 %             u = zeros(3,1);
 %         else
         %control mid-phase slip length
         %calculate desired joint angle
-        thd = flight_trajectory(th,option.mid_l,t_control);
+        t_control = t/t_flight;
+        dth = z(6:8);           % joint angular velocities
+        th = z(1:3);            % joint angles
+        thd = flight_trajectory(the_begin,option.mid_l,t_control);
         if option.leg == 1
             thd = vertcat(thd, [0]);
         end

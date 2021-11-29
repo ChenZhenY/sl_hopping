@@ -9,7 +9,7 @@ function [thd_2]= flight_trajectory(th,mid_l,t)
 [th1_init th2_init] = initial_condition_convert(init_angle, slip_l);
 % [th1_init th2_init] = initial_condition_convert(pi/3, 0.18);
 %mid-phase joint angle
-[th1_mid th2_mid] = initial_condition_convert(pi/2, .10);
+[th1_mid th2_mid] = initial_condition_convert(pi/2, mid_l);
 %land-phase joint angle
 [th1_end th2_end] = initial_condition_convert(pi-init_angle, slip_l);
 % [th1_end th2_end] = initial_condition_convert(2*pi/3, 0.18);
