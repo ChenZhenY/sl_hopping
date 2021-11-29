@@ -58,8 +58,8 @@ p = [p; ground_height];
 
 % Maximize the COM velocity at takeoff
 COM = COM_jumping_leg(zout,p); 
-% opti.minimize(-COM(4,N.ctrl)); % maxmize the y velocity of final time
-opti.minimize(-zout(10, N.ctrl));
+opti.minimize(-COM(4,N.ctrl)); % maxmize the y velocity of final time
+% opti.minimize(-COM(4,N.ctrl) + dot(N.ctrl,N.ctrl));
 
 %% Step 2: Add constraints
 % Adding constraints is likewise very simple, just use the

@@ -1,4 +1,4 @@
-function [tout, zout, uout, indices, slip_out] = hybrid_simulation(z0,ctrl,p,tspan, option)
+function [tout, zout, uout, indices, slip_out] = hybrid_simulation_hop(z0,ctrl,p,tspan, option)
 % Model hopping with swinging pendulum leg and fixed rotation
 %Inputs:
 % z0 - the initial state
