@@ -180,15 +180,19 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
 %         else
         %control mid-phase slip length
         %calculate desired joint angle
-        t_control = t/t_flight;
+        if t >= t_flight
+            t_control = 1;
+        else
+            t_control = t/t_flight;
+        end
         dth = z(6:8);           % joint angular velocities
         th = z(1:3);            % joint angles
         thd = flight_trajectory(the_begin,option.mid_l,t_control);
         if option.leg == 1
             thd = vertcat(thd, [0]);
         end
-        k = 5;                  % stiffness (N/rad)
-        b = .5;                 % damping (N/(rad/s))
+        k = 50;                  % stiffness (N/rad)
+        b = 5;                 % damping (N/(rad/s))
         u = -k*(th-thd) - b*dth;% apply PD control
 %         end
 

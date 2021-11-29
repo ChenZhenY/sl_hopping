@@ -9,7 +9,7 @@ function [thd_2]= flight_trajectory(th,mid_l,t)
 
 %% SLIP SPACE BEZIER TRAJECTORIES
 slip_bezier_angle = BezierCurve([init_angle, pi/2, pi - init_angle], t);
-slip_bezier_l = BezierCurve([slip_l, mid_l, slip_l], t);
+slip_bezier_l = BezierCurve([slip_l, mid_l,  slip_l], t);
 
 [thd_2(1,1), thd_2(2,1)] = initial_condition_convert(slip_bezier_angle, slip_bezier_l);
 

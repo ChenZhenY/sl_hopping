@@ -20,6 +20,9 @@ p = parameters();
 AC = p(20);
 DE = p(21);
 costh2 = -(AC^2 + DE^2 - init_length^2)/(2*AC*DE);
+if abs(costh2) > 1
+    disp('blah');
+end
 th2 = acos(costh2);
 
 cos_th1_a = sin(th2)*AC/init_length;

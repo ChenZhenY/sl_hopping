@@ -1,7 +1,7 @@
 t  = 60;
 
 [th1, th2] = initial_condition_convert(pi/3, 0.18);
-mid_l = 0.02;
+mid_l = 0.04;
 thd_1_array = 0;
 thd_2_array = 0;
 z0 = [th1; th2; 0; 0; 0; 0; 0; 0; 0.3; -0.3*1.732];
