@@ -189,7 +189,7 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         if option.leg == 1
             thd = vertcat(thd, [0]);
         end
-        k = 5;                  % stiffness (N/rad)
+        k = 20;                  % stiffness (N/rad)
         b = .5;                 % damping (N/(rad/s))
         u = -k*(th-thd) - b*dth;% apply PD control
 %         end

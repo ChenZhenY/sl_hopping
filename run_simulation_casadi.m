@@ -58,8 +58,9 @@ p = [p; ground_height];
 
 % Maximize the COM velocity at takeoff
 COM = COM_jumping_leg(zout,p); 
-opti.minimize(-COM(4,N.ctrl)); % maxmize the y velocity of final time
+% opti.minimize(-COM(4,N.ctrl)); % maxmize the y velocity of final time
 % opti.minimize(-COM(4,N.ctrl) + dot(N.ctrl,N.ctrl));
+opti.minimize(-zout(10, N.ctrl));
 
 %% Step 2: Add constraints
 % Adding constraints is likewise very simple, just use the
@@ -136,13 +137,14 @@ sol = opti.solve();
 
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
 % Parse solution
-tf = sol.value(ctrl.tf);          % simulation final time, no flight
+tf = sol.value(ctrl.tf)+0.1;          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 % 
 % z0(9) = 0.9;
 % z0(10) = -0.5;
-option.mid_l = .06;
+option.mid_l = 0.06;
+figure(1)
 [t z u indices] = hybrid_simulation_hop(z0,optimal_ctrl,p,[0 tf],option); % run simulation
 
 % current optimal:
@@ -150,12 +152,25 @@ option.mid_l = .06;
 % optimal_ctrl.T = [-0.7226   -0.0033   -2.0000    2.0000
 %                   1.8161   -2.0000   -2.0000   -2.0000]
 
-figure(1)
+foot_pos = zeros(3, length(t));
+foot_pos_hip = zeros(3, length(t));
+for i=1:length(t)
+    foot_pos_hip(:,i) = position_foot([z(1:2,i); zeros(8,1)],p);
+    foot_pos(:,i) = position_foot(z(:,i),p);
+end
+plot(foot_pos_hip(1,:), foot_pos_hip(2,:),'-o');
+
+figure(4)
+plot(t, foot_pos_hip(1,:),'-x')
+hold on
+plot(t, foot_pos(1,:))
+
+figure(2)
 COM = COM_jumping_leg(z,p);
 subplot(1,2,1)
-plot(t,COM(1,:))
+plot(t,COM(2,:))
 xlabel('time (s)')
-ylabel('CoM x (m)')
+ylabel('COM y (m)')
 title('Center of Mass Trajectory')
 subplot(1,2,2)
 plot(t,COM(4,:))
@@ -181,6 +196,6 @@ title('Center of Mass Vel. Trajectory')
 
 % Run the animation
 figure(3)                          % get the coordinates of the points to animate
-speed = .25;                                 % set animation speed
+speed = .05;                                 % set animation speed
 cla                                         % clear axes
 animate_hop(t,z,p)                 % run animation
