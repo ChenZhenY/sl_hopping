@@ -12,8 +12,8 @@ function animate(tspan, x, p)
     h_title = title('t=0.0s');
     
     axis equal
-    x_min = -.8;
-    x_max = .2;
+    x_min = -.2;
+    x_max = .8;
     axis([x_min x_max -.3 .1]*3); % -.2 .2 -.3 .1
     height = p(end);
     h_ground = plot([x_min x_max]*3,[height height],'k-','LineWidth',5);

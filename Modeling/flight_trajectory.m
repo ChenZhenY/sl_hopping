@@ -7,11 +7,22 @@ function [thd_2]= flight_trajectory(th,mid_l,t)
 [init_angle,slip_l] = joint2slip(th); % current slip model para
 %initial joint angle
 
+if t > 1 % avoid error in the flight time inaccuracy
+    t = 1
+end
+
 %% SLIP SPACE BEZIER TRAJECTORIES
 slip_bezier_angle = BezierCurve([init_angle, pi/2, pi - init_angle], t);
-slip_bezier_l = BezierCurve([slip_l, mid_l,  slip_l], t);
+slip_bezier_l = BezierCurve([slip_l, mid_l, slip_l], t);
+% plot([0 cos(slip_bezier_angle)*slip_bezier_l], [0, -sin(slip_bezier_angle)*slip_bezier_l]);
+% hold on
 
 [thd_2(1,1), thd_2(2,1)] = initial_condition_convert(slip_bezier_angle, slip_bezier_l);
+
+p = parameters();
+foot = position_foot(vertcat(thd_2(1,1), thd_2(2,1), zeros(8,1)), p);
+plot([0, foot(1)], [0, foot(2)]);
+hold on
 
 %% JOINT SPACE BEZIER TRAJECTORIES
 % [th1_init th2_init] = initial_condition_convert(init_angle, slip_l);

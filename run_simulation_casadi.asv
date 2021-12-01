@@ -30,7 +30,7 @@ ctrl.T  = opti.variable(2, num_ctrlpts); % Control values
 N.ctrl   = 50; % number of dynamics timesteps where ctrl is applied
 % only for hopping leg
 option.leg = 1;
-option.mid_l = .04;
+option.mid_l = .12;
 
 % Set parameters
 init_angle = pi/3;
@@ -137,14 +137,13 @@ sol = opti.solve();
 
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
 % Parse solution
-tf = sol.value(ctrl.tf)+0.1;          % simulation final time, no flight
+tf = sol.value(ctrl.tf)+0.2;          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 % 
 % z0(9) = 0.9;
 % z0(10) = -0.5;
 option.mid_l = 0.06;
-figure(1)
 [t z u indices] = hybrid_simulation_hop(z0,optimal_ctrl,p,[0 tf],option); % run simulation
 
 % current optimal:
@@ -161,16 +160,16 @@ end
 plot(foot_pos_hip(1,:), foot_pos_hip(2,:),'-o');
 
 figure(4)
-plot(t, foot_pos_hip(1,:),'-x')
+plot(t, foot_pos(2,:))
 hold on
-plot(t, foot_pos(1,:))
+plot(t, foot_pos_hip(2,:))
 
 figure(2)
 COM = COM_jumping_leg(z,p);
 subplot(1,2,1)
-plot(t,COM(2,:))
+plot(t,COM(1,:))
 xlabel('time (s)')
-ylabel('COM y (m)')
+ylabel('COM x (m)')
 title('Center of Mass Trajectory')
 subplot(1,2,2)
 plot(t,COM(4,:))
@@ -193,9 +192,9 @@ title('Center of Mass Vel. Trajectory')
 % ylabel('torque (Nm)')
 % title('Control Input Trajectory')
 % axis([0 0.45 0 2]);
-%%
+
 % Run the animation
 figure(3)                          % get the coordinates of the points to animate
-speed = .05;                                 % set animation speed
+speed = .25;                                 % set animation speed
 cla                                         % clear axes
 animate_hop(t,z,p)                 % run animation

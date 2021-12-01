@@ -72,7 +72,7 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation_hop(z0,ctrl,p
             % calculate flight time
             g = p(end-1);
             com = COM_jumping_leg(zout(:, i+1),p); %COM position & speed with respect to O
-            t_flight = 2*com(4)/g;
+            t_flight = 2*com(4)/g;                 % TODO: try to make it more precise
         elseif(Cy <= 0 && iphase == 2) % switch to stance
             iphase = 1;
             t_phase_start = t_global;
@@ -84,8 +84,8 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation_hop(z0,ctrl,p
     end % simulation loop
     
     % TODO: fix the indices logic and determine how to use
-    j=1;
-    indices = 0;
+%     j=1;
+%     indices = 0;
 %     for i = 1:num_step-1
 %         if (iphase_list(i+1) == iphase_list(i))
 %             indices(j) = indices(j)+1;
@@ -164,6 +164,8 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
             u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
             u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
         elseif option.leg == 2 % optimizing swinging
+            u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
+            u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
             u(3) = BezierCurve(ctrlpts(3,:), t/ctrl.tf);
         end
     else
@@ -191,8 +193,8 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         if option.leg == 1
             thd = vertcat(thd, [0]);
         end
-        k = 50;                  % stiffness (N/rad)
-        b = 5;                 % damping (N/(rad/s))
+        k = 20;                  % stiffness (N/rad)
+        b = .5;                 % damping (N/(rad/s))
         u = -k*(th-thd) - b*dth;% apply PD control
 %         end
 
