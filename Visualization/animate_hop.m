@@ -1,4 +1,4 @@
-function animate(tspan, x, p)
+function animate(tspan, x, p, interval)
     % Prepare plot handles
     hold on
     h_OB = plot([0],[0],'LineWidth',2);
@@ -16,7 +16,7 @@ function animate(tspan, x, p)
     x_max = .8;
     axis([x_min x_max -.3 .1]*3); % -.2 .2 -.3 .1
     height = p(end);
-    h_ground = plot([x_min x_max]*3,[height height],'k-','LineWidth',5);
+    h_ground = plot([x_min x_max]*3,[height height],'k-','LineWidth',1);
 
     %Step through and update animation
     for i = 1:length(tspan)
@@ -56,5 +56,5 @@ function animate(tspan, x, p)
         set(h_body,'XData',[rO(1) rO(1)]);
         set(h_body,'YData',[rO(2)+0.05 rO(2)]);
 
-        pause(.05) % pause .01
+        pause(interval) % pause .01
     end

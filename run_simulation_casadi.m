@@ -76,6 +76,7 @@ opti.subject_to(ctrl.T(:) <= 2 );
 % diff_ang = COM(4, N.ctrl) - tan(init_angle)*COM(3, N.ctrl);
 diff_ang = zout(10, N.ctrl) - tan(init_angle)*zout(9, N.ctrl);
 opti.subject_to(diff_ang == 0);
+% opti.subject_to(zout(2, N.ctrl) <= pi/3); % use max extension
 
 % Leg angle must stay within bounds
 for i = 1:N.ctrl
@@ -125,19 +126,19 @@ opti.solver('ipopt',p_opts);
 % of your optimization variables
 
 % Initial guess
-% opti.set_initial(ctrl.tf,0.35);
-% opti.set_initial(ctrl.T,[1 1.0 .5 0; 2.0 -1.0 .5 1]);
+opti.set_initial(ctrl.tf,0.235);
+opti.set_initial(ctrl.T,[1 1.0 .5 0; 2.0 -1.0 .5 1]);
 % setting to optimal solution we've solved for
-opti.set_initial(ctrl.tf,0.2383); % 2383
-opti.set_initial(ctrl.T,[-0.7226   -0.0033   -2.0000    2.0000
-                  1.8161   -2.0000   -2.0000   -2.0000]);
+% opti.set_initial(ctrl.tf,0.2583); % 2383
+% opti.set_initial(ctrl.T,[-0.7226   -0.0033   -2.0000    2.0000
+%                   1.8161   -2.0000   -2.0000   -2.0000]);
 
 % Solve the Optimization
 sol = opti.solve();
 
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
 % Parse solution
-tf = sol.value(ctrl.tf)+0.1;          % simulation final time, no flight
+tf = sol.value(ctrl.tf)+0.06;          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 % 
@@ -196,6 +197,6 @@ title('Center of Mass Vel. Trajectory')
 
 % Run the animation
 figure(3)                          % get the coordinates of the points to animate
-speed = .05;                                 % set animation speed
+pause = .1;                                 % set animation speed
 cla                                         % clear axes
-animate_hop(t,z,p)                 % run animation
+animate_hop(t,z,p, pause)                 % run animation
