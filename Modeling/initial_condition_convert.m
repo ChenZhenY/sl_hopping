@@ -1,7 +1,7 @@
 function [th1, th2] = initial_condition_convert(init_angle, init_length)
 % intro: convert SLIP angle and length of BE to joint angles
-% input: initial angle and length of BE [0, pi]
-% output: the corresponding joint anlge [0, 0.186]
+% input: initial angle [0, pi] and length [0, 0.186] of BE 
+% output: the corresponding joint angle
 
 p = parameters();
 
