@@ -137,7 +137,7 @@ sol = opti.solve();
 
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
 % Parse solution
-tf = sol.value(ctrl.tf)+0.1;          % simulation final time, no flight
+tf = sol.value(ctrl.tf)+0.4;          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 % 
