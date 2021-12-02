@@ -8,7 +8,7 @@ function [thd_2]= flight_trajectory(th,mid_l,t)
 %initial joint angle
 
 if t > 1 % avoid error in the flight time inaccuracy
-    t = 1;
+    t = 1
 end
 
 %% SLIP SPACE BEZIER TRAJECTORIES

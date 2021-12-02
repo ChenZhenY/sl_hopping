@@ -39,8 +39,7 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation_hop(z0,ctrl,p
     t_phase_start = 0;
     t_flight = 0; % duration of flight phase from phase start time (relative time)
     the_begin = zeros(3,1); % send the state at phase change (from stance2flight) to control_law
-    % Cy has to be some threshold away from 0 to switch phases
-    tolerance = .001;
+
     
     % start simulation yay
     for i = 1:num_step-1
@@ -63,12 +62,12 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation_hop(z0,ctrl,p
         Cy = pos(2) - ground_height;
         % determine phase
         indices = 0;
-        
+        % Cy has to be some threshold away from 0 to switch phases
+        tolerance = .001;
         if(Cy > tolerance && iphase == 1)      % switch to jump
             iphase = 2;
             indices = 1;
-            the_begin = zout(1:3,i);
-            disp(the_begin);
+            the_begin = zout(1:3);
             t_phase_start = t_global;
             disp('iphase == 2');
             disp(t_phase_start);
@@ -167,13 +166,8 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
 %             disp("hhhhhaaaa");
 %         end
         if option.leg == 1 % optimizing hopping
-            if t > ctrl.tf % we are done controlling the leg
-                u(1) = 0;
-                u(2) = 0;
-            else % control leg to hop
-                u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
-                u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
-            end
+            u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
+            u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
         elseif option.leg == 2 % optimizing swinging
             u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
             u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
@@ -201,8 +195,6 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         dth = z(6:8);           % joint angular velocities
         th = z(1:3);            % joint angles
         thd = flight_trajectory(the_begin,option.mid_l,t_control);
-%         disp('theta begin');
-%         disp(the_begin);
         if option.leg == 1
             thd = vertcat(thd, [0]);
         end
