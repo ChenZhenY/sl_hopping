@@ -163,6 +163,9 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
     if iphase == 1 % stance
         ctrlpts = ctrl.T;
         u = zeros(3,1);
+%         if t/ctrl.tf>1
+%             disp("hhhhhaaaa");
+%         end
         if option.leg == 1 % optimizing hopping
             if t > ctrl.tf % we are done controlling the leg
                 u(1) = 0;
