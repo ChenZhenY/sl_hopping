@@ -67,7 +67,7 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation_hop(z0,ctrl,p
         if(Cy > tolerance && iphase == 1)      % switch to jump
             iphase = 2;
             indices = 1;
-            the_begin = zout(1:3);
+            the_begin = zout(1:3,i);
             t_phase_start = t_global;
             disp('iphase == 2');
             disp(t_phase_start);

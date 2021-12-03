@@ -17,10 +17,6 @@ x = -foot_pos(1) + pos_hip(1);
 y = -foot_pos(2) + pos_hip(2);
 
 %calculate slip angle&length
-if x > 0
-    angle = 2*pi - atan2(y , x);
-else
-    angle = -atan2(y , x) + pi;
-end
+angle = pi - atan2(y , x);
 length = sqrt(x * x + y * y);
 end
