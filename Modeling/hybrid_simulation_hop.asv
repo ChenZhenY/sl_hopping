@@ -162,9 +162,6 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
     if iphase == 1 % stance
         ctrlpts = ctrl.T;
         u = zeros(3,1);
-%         if t/ctrl.tf>1
-%             disp("hhhhhaaaa");
-%         end
         if option.leg == 1 % optimizing hopping
             u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
             u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);

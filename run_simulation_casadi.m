@@ -30,7 +30,7 @@ ctrl.T  = opti.variable(2, num_ctrlpts); % Control values
 N.ctrl   = 50; % number of dynamics timesteps where ctrl is applied
 % only for hopping leg
 option.leg = 1;
-option.mid_l = .12;
+option.mid_l = .04;
 
 % Set parameters
 init_angle = pi/3;
@@ -194,7 +194,7 @@ title('Center of Mass Vel. Trajectory')
 % ylabel('torque (Nm)')
 % title('Control Input Trajectory')
 % axis([0 0.45 0 2]);
-
+%%
 % Run the animation
 figure(3)                          % get the coordinates of the points to animate
 pause = .1;                                 % set animation speed
