@@ -4,7 +4,7 @@ clear all; close all; clc;
 % We can organize our code by filing things in different folders.  These
 % folders need to be added to the Matlab path so that it can run the files
 % inside them even when they are not the current folder listed at the top
-% of the Matlab window.  For more information about the current folder, see
+% of the Matlab window.  For more   information about the current folder, see
 % http://www.mathworks.com/help/matlab/matlab_env/understanding-file-locations-in-matlab.html
 % For more information about the Matlab path, see
 % http://www.mathworks.com/help/matlab/matlab_env/what-is-the-matlab-search-path.html
@@ -138,7 +138,7 @@ sol = opti.solve();
 
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
 % Parse solution
-tf = sol.value(ctrl.tf)+0.06;          % simulation final time, no flight
+tf = sol.value(ctrl.tf)+0.6;          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 % 
