@@ -12,8 +12,12 @@ if t > 1 % avoid error in the flight time inaccuracy
 end
 
 %% SLIP SPACE BEZIER TRAJECTORIES
-slip_bezier_angle = BezierCurve([init_angle, pi/2, pi - init_angle], t);
-slip_bezier_l = BezierCurve([slip_l, mid_l, slip_l], t);
+% slip_bezier_angle = BezierCurve([init_angle, pi/2, pi - init_angle], t);
+% slip_bezier_l = BezierCurve([slip_l, mid_l, slip_l], t);
+
+% set the end state as the initial condition of stance phase
+slip_bezier_angle = BezierCurve([init_angle, pi/2, pi/3], t);
+slip_bezier_l = BezierCurve([slip_l, mid_l, 0.18], t);
 % plot([0 cos(slip_bezier_angle)*slip_bezier_l], [0, -sin(slip_bezier_angle)*slip_bezier_l]);
 % hold on
 

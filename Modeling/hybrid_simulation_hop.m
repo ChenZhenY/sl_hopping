@@ -1,4 +1,4 @@
-function [tout, zout, uout, indices, slip_out] = hybrid_simulation_hop(z0,ctrl,p,tspan, option)
+function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,ctrl,p,tspan, option)
 % Model hopping with swinging pendulum leg and fixed rotation
 %Inputs:
 % z0 - the initial state
@@ -23,8 +23,8 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation_hop(z0,ctrl,p
 % slip_out - vector of differences between fx and friction cone limits.
 % Positive values indicate slip.
 
-    restitution_coeff = 0.;
-    friction_coeff = .5;    % 0.3 and 10
+    restitution_coeff = 0.0;
+    friction_coeff = 15;    % 0.3 and 10
     ground_height = p(end);
 
     t0 = tspan(1); %tend = tspan(end);   % set initial and final times
@@ -40,6 +40,7 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation_hop(z0,ctrl,p
     t_flight = 0; % duration of flight phase from phase start time (relative time)
     the_begin = zeros(3,1); % send the state at phase change (from stance2flight) to control_law
 
+    Cy_l = zeros(1,num_step-1);
     
     % start simulation yay
     for i = 1:num_step-1
@@ -54,12 +55,13 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation_hop(z0,ctrl,p
             friction_coeff, ground_height); %determine contact or not
         
         zout(1:5,i+1) = zout(1:5,i) + zout(6:10, i+1)*dt;% use velocity to update position
-        uout(:,i+1) = u; 
+        uout(:,i+1) = u;
         slip_out(i+1) = slip;
         
         % do not let anything except the hopping for touch the ground
         pos = position_foot(zout(:, i+1),p);
         Cy = pos(2) - ground_height;
+        Cy_l(i) = Cy;
         % determine phase
         indices = 0;
         % Cy has to be some threshold away from 0 to switch phases
@@ -74,8 +76,10 @@ function [tout, zout, uout, indices, slip_out] = hybrid_simulation_hop(z0,ctrl,p
             % calculate flight time
             g = p(end-1);
             com = COM_jumping_leg(zout(:, i+1),p); %COM position & speed with respect to O
-            t_flight = 2*com(4)/g;                 % TODO: try to make it more precise
-        elseif(Cy < -tolerance && iphase == 2) % switch to stance
+            t_flight = 2*com(4)/g*0.3;                 % TODO: try to make it more precise
+        elseif(Cy <= -tolerance*0 && iphase == 2) % switch to stance
+            [th1, th2] = initial_condition_convert(pi/3, 0.18);
+            % zout(6:10,i+1) = [0; 0; 0; 0.35; -0.35*tan(pi/3)]; 
             iphase = 1;
             t_phase_start = t_global;
             disp('iphase == 1');
