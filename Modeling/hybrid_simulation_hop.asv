@@ -162,6 +162,11 @@ end
 %% Control law of BezierCurve SISO
 % TODO: to be changed for three variables control
 function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
+    k = 20;                  % stiffness (N/rad)
+    b = .5;                 % damping (N/(rad/s))
+    % for swing leg; adjust to change phases
+    swing_stance_angles = [-pi/2, - pi/4, 0, pi/2]; % forward swing during stance
+    swing_flight_angles = [pi/2, 0, -pi/2]; % backward swing during flight
     
     if iphase == 1 % stance
         ctrlpts = ctrl.T;
@@ -171,7 +176,11 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
         
         if option.leg == 2 % include swinging
-            u(3) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
+            % do pd control for swinging leg
+            th3d = BezierCurve(swing_stance_angles, t); % joint traj
+            u(3) = -k*(z(3)-th3d) - b*z(8);% apply PD control
+%             u(3) = -.2;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);
+            
         end
     else
         % PD Control in flight
@@ -198,13 +207,13 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         if option.leg == 1
             thd = vertcat(thd, [0]);
         else
-            thd = vertcat(thd, thd(1));
+            th3d = BezierCurve(swing_stance_angles, t); % joint traj
+            thd = vertcat(thd, pi/2);
         end
-        k = 20;                  % stiffness (N/rad)
-        b = .5;                 % damping (N/(rad/s))
+
         u = -k*(th-thd) - b*dth;% apply PD control
 %         end
-        u(3+
+%         u(3) = u(3) + pi/2;
 
     end
 end
