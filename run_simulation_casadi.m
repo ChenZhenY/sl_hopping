@@ -143,6 +143,8 @@ sol = opti.solve();
 tf = sol.value(ctrl.tf)+0.55;          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
+% control swing leg as well
+option.leg = 2;
 %   
 % z0(9) = 0.9;
 % z0(10) = -0.5;

@@ -171,7 +171,7 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
         
         if option.leg == 2 % include swinging
-            u(3) = 0;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);
+            u(3) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
         end
     else
         % PD Control in flight
@@ -204,7 +204,7 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         b = .5;                 % damping (N/(rad/s))
         u = -k*(th-thd) - b*dth;% apply PD control
 %         end
-%         u(3) = u(3) + pi/2;
+        u(3+
 
     end
 end
