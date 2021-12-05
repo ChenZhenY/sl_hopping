@@ -165,8 +165,8 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
     k = 20;                  % stiffness (N/rad)
     b = .5;                 % damping (N/(rad/s))
     % for swing leg; adjust to change phases
-    swing_stance_angles = [-pi/2, - pi/4, 0, pi/2]; % forward swing during stance
-    swing_flight_angles = [pi/2, 0, -pi/2]; % backward swing during flight
+    swing_stance_angles = [-pi/4, - pi/8, 0, pi/4]; % forward swing during stance
+    swing_flight_angles = [pi/4, 0, -pi/4]; % backward swing during flight
 %     swing_flight_angles = [-pi/2, - pi/4, 0, pi/2];
 %     swing_stance_angles = [pi/2, 0, -pi/2];
     
