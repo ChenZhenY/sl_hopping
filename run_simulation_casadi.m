@@ -129,13 +129,12 @@ opti.solver('ipopt',p_opts);
 
 % Initial guess
 opti.set_initial(ctrl.tf,0.235);
-% opti.set_initial(ctrl.T,[1 1.0 .5 0; 2.0 -1.0 .5 1]); % working for no
+opti.set_initial(ctrl.T,[1 1.0 .5 0; 2.0 -1.0 .5 1]); % working for no
 % motor modelling
 % setting to optimal solution we've solved for
 % opti.set_initial(ctrl.tf,0.2583); % 2383
 % opti.set_initial(ctrl.T,[-0.7226   -0.0033   -2.0000    2.0000
 %                   1.8161   -2.0000   -2.0000   -2.0000]);
-opti.set_initial(ctrl.T,[1 1.0 .5 0; 2.0 -1.0 .5 1]);
 
 % Solve the Optimization
 sol = opti.solve();
@@ -146,7 +145,7 @@ tf = sol.value(ctrl.tf)+0.55;          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 % control swing leg as well
-option.leg = 2;
+option.leg = 1;
 %   
 % z0(9) = 0.9;
 % z0(10) = -0.5;

@@ -179,6 +179,7 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         
         if option.leg == 2 % include swinging
             % do pd control for swinging leg
+            % TODO: linear interpolation
             th3d = BezierCurve(swing_stance_angles, t); % joint traj
             u(3) = -k*(z(3)-th3d) - b*z(8);% apply PD control
 %             u(3) = -.2;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);
@@ -215,7 +216,6 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
 
         u = -k*(th-thd) - b*dth;% apply PD control
 %         end
-%         u(3) = u(3) + pi/2;
 
     end
 end
