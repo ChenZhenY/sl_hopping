@@ -5,11 +5,11 @@ function p = parameters()
     % mass of modelled system: 0.28903
     % mass of real swing leg: 0.11 
     % ratio of system to swing leg: 1: .11
-    m5 = .03;%.0393 + .1;       %  %
+    m5 = .03; %.0393 + .1;        
     I5 = 25.1 * 10^-6; 
     l_O_m5 = .09;
     
-    m1 =.0393 + .2 + .109;         m2 =.0368; 
+    m1 =.0393_+ .2S;         m2 =.0368; 
     m3 = .00783;            m4 = .0155;
     I1 = 25.1 * 10^-6;      I2 = 53.5 * 10^-6;
     I3 = 9.25 * 10^-6;      I4 = 22.176 * 10^-6;

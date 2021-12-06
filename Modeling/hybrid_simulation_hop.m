@@ -164,20 +164,28 @@ end
 %% Control law of BezierCurve SISO
 % TODO: to be changed for three variables control
 function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
+    k = 20;                  % stiffness (N/rad)
+    b = .5;                 % damping (N/(rad/s))
+    % for swing leg; adjust to change phases
+    swing_stance_angles = [-pi/4, - pi/8, 0, pi/4]; % forward swing during stance
+    swing_flight_angles = [pi/4, 0, -pi/4]; % backward swing during flight
+%     swing_flight_angles = [-pi/2, - pi/4, 0, pi/2];
+%     swing_stance_angles = [pi/2, 0, -pi/2];
     
     if iphase == 1 % stance
         ctrlpts = ctrl.T;
         u = zeros(3,1);
-%         if t/ctrl.tf>1
-%             disp("hhhhhaaaa");
-%         end
-        if option.leg == 1 % optimizing hopping
-            u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
-            u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
-        elseif option.leg == 2 % optimizing swinging
-            u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
-            u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
-            u(3) = BezierCurve(ctrlpts(3,:), t/ctrl.tf);
+        % control hopping leg
+        u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
+        u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
+        
+        if option.leg == 2 % include swinging
+            % do pd control for swinging leg
+            % TODO: linear interpolation
+            th3d = BezierCurve(swing_stance_angles, t); % joint traj
+            u(3) = -k*(z(3)-th3d) - b*z(8);% apply PD control
+%             u(3) = -.2;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);
+            
         end
     else
         % PD Control in flight
@@ -203,9 +211,11 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         thd = flight_trajectory(the_begin,option.mid_l,t_control);
         if option.leg == 1
             thd = vertcat(thd, [0]);
+        else
+            th3d = BezierCurve(swing_flight_angles, t); % joint traj
+            thd = vertcat(thd, th3d);
         end
-        k = 20;                  % stiffness (N/rad)
-        b = .5;                 % damping (N/(rad/s))
+
         u = -k*(th-thd) - b*dth;% apply PD control
 %         end
 
