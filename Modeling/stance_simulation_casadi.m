@@ -9,7 +9,7 @@ function [tout,zout,uout,slip] = stance_simulation_casadi(z0,ctrl,p,N,option)
     
     % simulation parameters
     restitution_coeff = 0.;
-    friction_coeff = 1;    % 0.3 and 10
+    friction_coeff = 10;    % 0.3 and 10
     ground_height = p(end);
 
     % Declare casadi symbolic variables

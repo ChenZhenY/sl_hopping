@@ -71,8 +71,8 @@ opti.minimize(-zout(10, N.ctrl));
 % Add lower and upper bounds
 opti.subject_to(ctrl.tf >= 0.1);
 opti.subject_to(ctrl.tf <= 0.6);
-opti.subject_to(ctrl.T(:) >= -2);
-opti.subject_to(ctrl.T(:) <= 2 );
+opti.subject_to(ctrl.T(:) >= -2); % original 2
+opti.subject_to(ctrl.T(:) <= 2);
 
 % make sure lift off with velocity angle of 
 % diff_ang = COM(4, N.ctrl) - tan(init_angle)*COM(3, N.ctrl);
@@ -140,7 +140,7 @@ sol = opti.solve();
 
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
 % Parse solution
-tf = sol.value(ctrl.tf)+0.55;          % simulation final time, no flight
+tf = sol.value(ctrl.tf)+.55;          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 %   

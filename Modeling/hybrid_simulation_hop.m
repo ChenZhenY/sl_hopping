@@ -24,7 +24,7 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
 % Positive values indicate slip.
 
     restitution_coeff = 0.0;
-    friction_coeff = 15;    % 0.3 and 10
+    friction_coeff = 0.5;    % 0.3 and 10
     ground_height = p(end);
 
     t0 = tspan(1); %tend = tspan(end);   % set initial and final times
@@ -51,7 +51,7 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
         [dz, u] = dynamics_continuous(t_relative,zout(:,i),ctrl,p,iphase, option, t_flight, the_begin);
         zout(:,i+1) = zout(:,i) + dz*dt; % continuous dynamic determine status for contact determination
             
-        [zout(6:10,i+1), slip] = discrete_impact_contact(zout(:,i+1),p, restitution_coeff,...
+        [zout(6:10,i+1), slip, Fcy] = discrete_impact_contact(zout(:,i+1),p, restitution_coeff,...
             friction_coeff, ground_height); %determine contact or not
         
         zout(1:5,i+1) = zout(1:5,i) + zout(6:10, i+1)*dt;% use velocity to update position
@@ -61,7 +61,8 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
         % do not let anything except the hopping for touch the ground
         pos = position_foot(zout(:, i+1),p);
         Cy = pos(2) - ground_height;
-        Cy_l(i) = Cy;
+        % Cy_l(i) = Cy;
+        Cy_l(i) = Fcy; % denote contact force Fcy
         % determine phase
         indices = 0;
         % Cy has to be some threshold away from 0 to switch phases
@@ -79,7 +80,7 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
             t_flight = 2*com(4)/g*0.3;                 % TODO: try to make it more precise
         elseif(Cy <= -tolerance*0 && iphase == 2) % switch to stance
             [th1, th2] = initial_condition_convert(pi/3, 0.18);
-            % zout(6:10,i+1) = [0; 0; 0; 0.35; -0.35*tan(pi/3)]; 
+            zout(6:10,i+1) = [0; 0; 0; 0.35; -0.35*tan(pi/3)]; 
             iphase = 1;
             t_phase_start = t_global;
             disp('iphase == 1');
@@ -104,13 +105,14 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
 end
 
 %% Discrete Contact
-function [qdot, slip] = discrete_impact_contact(z,p,rest_coeff, fric_coeff, yC)
+function [qdot, slip, Fcy] = discrete_impact_contact(z,p,rest_coeff, fric_coeff, yC)
     % compute height of the foot
     pos = position_foot(z,p);
     vel = velocity_foot(z,p);
     Cy = pos(2)-yC;
     dCy = vel(2);
     slip = 0; % difference between required horizontal force and closest friction cone bound (>0 means slip)
+    Fcy = 0;
     
     % only update dq when constraints violated
     if Cy<0 && dCy<0 % hopping foot
@@ -128,14 +130,14 @@ function [qdot, slip] = discrete_impact_contact(z,p,rest_coeff, fric_coeff, yC)
         q_dot = dq + inv(M)*Jcy'*Fcy;
         % update horizontal force
         Fcx = Acx*(0-Jcx*q_dot);
-        if Fcx > fric_coeff*Fcy
-            slip = Fcx - fric_coeff*Fcy;
-            Fcx = fric_coeff*Fcy;
-        end
-        if Fcx < -fric_coeff*Fcy
-            slip = Fcx - fric_coeff*Fcy;
-            Fcx = -fric_coeff*Fcy;
-        end
+%         if Fcx > fric_coeff*Fcy
+%             slip = Fcx - fric_coeff*Fcy;
+%             Fcx = fric_coeff*Fcy;
+%         end
+%         if Fcx < -fric_coeff*Fcy
+%             slip = Fcx - fric_coeff*Fcy;
+%             Fcx = -fric_coeff*Fcy;
+%         end
         qdot = q_dot + inv(M)*Jcx'*Fcx;
     else
         qdot = z(6:10);
