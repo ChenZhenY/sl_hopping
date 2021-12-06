@@ -130,14 +130,14 @@ function [qdot, slip, Fcy] = discrete_impact_contact(z,p,rest_coeff, fric_coeff,
         q_dot = dq + inv(M)*Jcy'*Fcy;
         % update horizontal force
         Fcx = Acx*(0-Jcx*q_dot);
-%         if Fcx > fric_coeff*Fcy
-%             slip = Fcx - fric_coeff*Fcy;
-%             Fcx = fric_coeff*Fcy;
-%         end
-%         if Fcx < -fric_coeff*Fcy
-%             slip = Fcx - fric_coeff*Fcy;
-%             Fcx = -fric_coeff*Fcy;
-%         end
+        if Fcx > fric_coeff*Fcy
+            slip = Fcx - fric_coeff*Fcy;
+            Fcx = fric_coeff*Fcy;
+        end
+        if Fcx < -fric_coeff*Fcy
+            slip = Fcx - fric_coeff*Fcy;
+            Fcx = -fric_coeff*Fcy;
+        end
         qdot = q_dot + inv(M)*Jcx'*Fcx;
     else
         qdot = z(6:10);
@@ -166,6 +166,8 @@ end
 function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
     k = 20;                  % stiffness (N/rad)
     b = .5;                 % damping (N/(rad/s))
+    k_swing = 1;
+    b_swing = 0.2;
     % for swing leg; adjust to change phases
     swing_stance_angles = [-pi/4, 0, pi/4]; % forward swing during stance
     swing_flight_angles = [pi/4, 0, -pi/4]; % backward swing during flight
@@ -181,10 +183,20 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         
         if option.leg == 2 % include swinging
             % do pd control for swinging leg
-%             th3d = BezierCurve(swing_stance_angles, t); % joint traj
-            % linear interpolation
-            th3d = interp1([0:.5:1], swing_stance_angles, t);
-            u(3) = -k*(z(3)-th3d) - b*z(8);% apply PD control
+            t_evaluate = t/ctrl.tf;
+            if t_evaluate >= 1
+%                 th3d = swing_stance_angles(end);
+%                 th3d = z(3);
+                u(3) = -.2;
+                disp(t_evaluate);
+            else
+                th3d = BezierCurve(swing_stance_angles, t_evaluate/2); % joint traj
+                % linear interpolation
+    %             th3d = interp1([0:.5:1], swing_stance_angles, min(t/ctrl.tf/2,1));
+                u(3) = -k_swing*(z(3)-th3d) - b_swing*z(8);% apply PD control
+                disp(u(3));
+            end
+    
 %             u(3) = -.2;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);
             
         end
@@ -217,7 +229,7 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
             thd = vertcat(thd, th3d);
         end
 
-        u = -k*(th-thd) - b*dth;% apply PD control
+        u = -[k k k_swing]'.*(th-thd) - [b b b_swing]'.*dth;% apply PD control
 %         end
 
     end

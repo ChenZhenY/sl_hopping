@@ -195,7 +195,7 @@ title('Center of Mass Vel. Trajectory')
 % plot(ctrl_t, ctrl_input);
 % plot(ctrl_pt_t, optimal_ctrl.T, 'o');
 % hold off
-% xlabel('time (s)')
+% xlabel('time (s)')    
 % ylabel('torque (Nm)')
 % title('Control Input Trajectory')
 % axis([0 0.45 0 2]);
