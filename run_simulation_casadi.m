@@ -141,14 +141,23 @@ opti.set_initial(ctrl.T,[1 1.0 .5 0; 2.0 -1.0 .5 1]); % working for no
 sol = opti.solve();
 
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
-% Parse solution
-tf = sol.value(ctrl.tf)+.55;          % simulation final time, no flight
-optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
-optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 % control swing leg as well
 option.leg = 2;
 option.phase_shift = 1;
+
+p = parameters();                           % get parameters from file
+pos_foot0 = position_foot(z0, p);  
+ground_height = pos_foot0(2);
+p = [p; ground_height];
+p(5) = .0393 + .13;     % dirty trick: make hopping better
+
+tf = sol.value(ctrl.tf)+0.9;          % simulation final time, no flight
+optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
+optimal_ctrl.T  = sol.value(ctrl.T);  % control values
+
 option.mid_l = 0.06;
+option.control = 2; % 1 for bezeier, 2 for joint pos
+
 figure(1)
 [t, z, u, indices, slip, Cy_l] = hybrid_simulation_hop(z0,optimal_ctrl,p,[0 tf],option); % run simulation
 %   
