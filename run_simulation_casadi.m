@@ -31,6 +31,7 @@ N.ctrl   = 50; % number of dynamics timesteps where ctrl is applied
 % only for hopping leg
 option.leg = 1;
 option.mid_l = .04;
+option.phase_shift = 0; % phase shift between leg swings
 
 % Set parameters
 init_angle = pi/3;
@@ -140,6 +141,10 @@ opti.set_initial(ctrl.T,[1 1.0 .5 0; 2.0 -1.0 .5 1]); % working for no
 sol = opti.solve();
 
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
+% control swing leg as well
+option.leg = 2;
+option.phase_shift = 1;
+
 p = parameters();                           % get parameters from file
 pos_foot0 = position_foot(z0, p);  
 ground_height = pos_foot0(2);
@@ -156,7 +161,9 @@ option.control = 2; % 1 for bezeier, 2 for joint pos
 
 figure(1)
 [t, z, u, indices, slip, Cy_l] = hybrid_simulation_hop(z0,optimal_ctrl,p,[0 tf],option); % run simulation
-
+%   
+% z0(9) = 0.9;
+% z0(10) = -0.5;
 % current optimal:
 % optimal_ctrl.tf = 0.2383
 % optimal_ctrl.T = [-0.7226   -0.0033   -2.0000    2.0000
