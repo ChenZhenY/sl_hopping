@@ -9,6 +9,8 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
 %   leg: 1 for hopping leg simulation, 2 for swinging leg
 %          (TBD) num_repeat: number of repeat of simulation
 %   mid_l: desired SLIP model length of leg at midpoint of flight phase
+%   control: control method used in stance phase, 1 for bezier curve, 2 for
+%           joint space control
 % 
 % Outputs:
 % tout - vector of all time points
@@ -39,8 +41,12 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
     t_phase_start = 0;
     t_flight = 0; % duration of flight phase from phase start time (relative time)
     the_begin = zeros(3,1); % send the state at phase change (from stance2flight) to control_law
-
+    target_pos = zeros(10,1);
+    
     Cy_l = zeros(1,num_step-1);
+    
+    % load the stance phase joint pos for control
+    stance_state = load('stance_joint_pos_1207.mat');
     
     % start simulation yay
     for i = 1:num_step-1
@@ -48,7 +54,8 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
         t_relative = t_global - t_phase_start;
         
         iphase = iphase_list(i);
-        [dz, u] = dynamics_continuous(t_relative,zout(:,i),ctrl,p,iphase, option, t_flight, the_begin);
+        target_pos = stance_state.z(:,floor(t_relative/dt)+1);
+        [dz, u] = dynamics_continuous(t_relative,zout(:,i),ctrl,p,iphase, option, t_flight, the_begin, target_pos);
         zout(:,i+1) = zout(:,i) + dz*dt; % continuous dynamic determine status for contact determination
             
         [zout(6:10,i+1), slip, Fcy] = discrete_impact_contact(zout(:,i+1),p, restitution_coeff,...
@@ -80,7 +87,9 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
             t_flight = 2*com(4)/g*0.3;                 % TODO: try to make it more precise
         elseif(Cy <= -tolerance*0 && iphase == 2) % switch to stance
             [th1, th2] = initial_condition_convert(pi/3, 0.18);
-            zout(6:10,i+1) = [0; 0; 0; 0.35; -0.35*tan(pi/3)]; 
+            if option.control == 1 % pure torque control
+                zout(6:10,i+1) = [0; 0; 0; 0.35; -0.35*tan(pi/3)]; 
+            end
             iphase = 1;
             t_phase_start = t_global;
             disp('iphase == 1');
@@ -145,9 +154,9 @@ function [qdot, slip, Fcy] = discrete_impact_contact(z,p,rest_coeff, fric_coeff,
 end
 
 %% Continuous dynamics
-function [dz, u] = dynamics_continuous(t,z,ctrl,p,iphase, option, t_flight, the_begin)
+function [dz, u] = dynamics_continuous(t,z,ctrl,p,iphase, option, t_flight, the_begin, target_pos)
 
-    u = control_laws(t, z, ctrl, iphase, p, option, t_flight, the_begin);  % get 3 motor torque controls at this instant
+    u = control_laws(t, z, ctrl, iphase, p, option, t_flight, the_begin, target_pos);  % get 3 motor torque controls at this instant
     % TODO: need a test strategy
     % TODO: we don't handle constraints Fc here?
     % u = [0; 0; 0];
@@ -163,7 +172,7 @@ end
 
 %% Control law of BezierCurve SISO
 % TODO: to be changed for three variables control
-function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
+function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, target_pos)
     k = 20;                  % stiffness (N/rad)
     b = .5;                 % damping (N/(rad/s))
     k_swing = 1;
@@ -175,12 +184,22 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
 %     swing_stance_angles = [pi/2, 0, -pi/2];
     
     if iphase == 1 % stance
-        ctrlpts = ctrl.T;
         u = zeros(3,1);
-        % control hopping leg
-        u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
-        u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
         
+        % for hopping leg control
+        if option.control == 1 % using bezier curve
+            ctrlpts = ctrl.T;
+            u = zeros(3,1);
+            % control hopping leg
+            u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
+            u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
+        elseif option.control == 2 % using joint pos control
+            err = target_pos - z;
+            u(1) = k*err(1) + b*err(6);
+            u(2) = k*err(2) + b*err(7);
+        end
+            
+        % for swing leg control
         if option.leg == 2 % include swinging
             % do pd control for swinging leg
             t_evaluate = t/ctrl.tf;
@@ -188,30 +207,17 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
 %                 th3d = swing_stance_angles(end);
 %                 th3d = z(3);
                 u(3) = -.2;
-                disp(t_evaluate);
+                % disp(t_evaluate);
             else
                 th3d = BezierCurve(swing_stance_angles, t_evaluate/2); % joint traj
                 % linear interpolation
     %             th3d = interp1([0:.5:1], swing_stance_angles, min(t/ctrl.tf/2,1));
                 u(3) = -k_swing*(z(3)-th3d) - b_swing*z(8);% apply PD control
-                disp(u(3));
+                % disp(u(3));
             end
-    
-%             u(3) = -.2;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);
-            
+%             u(3) = -.2;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);  
         end
     else
-        % PD Control in flight
-%         global th_begin;
-%         if indices == 1
-%            th_begin = z(1:3)            % joint angles
-%         end
-        
-%         COM_yvel = z(10) + com(4); %z(10) is y axis velocity of O
-        
-%         if t > t_flight
-%             u = zeros(3,1);
-%         else
         %control mid-phase slip length
         %calculate desired joint angle
         if t >= t_flight
@@ -230,7 +236,17 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         end
 
         u = -[k k k_swing]'.*(th-thd) - [b b b_swing]'.*dth;% apply PD control
-%         end
-
     end
 end
+
+        % PD Control in flight
+%         global th_begin;
+%         if indices == 1
+%            th_begin = z(1:3)            % joint angles
+%         end
+        
+%         COM_yvel = z(10) + com(4); %z(10) is y axis velocity of O
+        
+%         if t > t_flight
+%             u = zeros(3,1);
+%         else
