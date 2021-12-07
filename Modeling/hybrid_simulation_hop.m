@@ -99,7 +99,7 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
         iphase_list(i+1) = iphase;    
     end % simulation loop
     
-    % TODO: fix the indices logic and determine how to use
+% TODO: fix the indices logic and determine how to use
 %     j=1;
 %     indices = 0;
 %     for i = 1:num_step-1
@@ -174,8 +174,8 @@ end
 % TODO: to be changed for three variables control
 function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, target_pos)
     k = 20;                  % stiffness (N/rad)
-    b = .5;                 % damping (N/(rad/s))
-    k_swing = 1;
+    b = .6;                 % damping (N/(rad/s))
+    k_swing = 6;
     b_swing = 0.2;
     % for swing leg; adjust to change phases
     swing_stance_angles = [-pi/4, 0, pi/4]; % forward swing during stance
@@ -189,7 +189,6 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
         % for hopping leg control
         if option.control == 1 % using bezier curve
             ctrlpts = ctrl.T;
-            u = zeros(3,1);
             % control hopping leg
             u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
             u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
@@ -198,8 +197,12 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
             u(1) = k*err(1) + b*err(6);
             u(2) = k*err(2) + b*err(7);
         end
+%         if z(2) < pi/6 % limit the joint angle for stance phase
+%            u(2) = 0.1*k*(pi/6-z(2)) - b*z(7);
+%            disp('violate');
+%         end
             
-        % for swing leg control
+        % only for swing leg control
         if option.leg == 2 % include swinging
             % do pd control for swinging leg
             t_evaluate = t/ctrl.tf;
@@ -207,15 +210,12 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
 %                 th3d = swing_stance_angles(end);
 %                 th3d = z(3);
                 u(3) = -.2;
-                % disp(t_evaluate);
             else
-                th3d = BezierCurve(swing_stance_angles, t_evaluate/2); % joint traj
+                th3d = BezierCurve(swing_stance_angles, min(t_evaluate*2,1)); % joint traj
                 % linear interpolation
     %             th3d = interp1([0:.5:1], swing_stance_angles, min(t/ctrl.tf/2,1));
                 u(3) = -k_swing*(z(3)-th3d) - b_swing*z(8);% apply PD control
-                % disp(u(3));
-            end
-%             u(3) = -.2;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);  
+            end  
         end
     else
         %control mid-phase slip length
@@ -250,3 +250,4 @@ end
 %         if t > t_flight
 %             u = zeros(3,1);
 %         else
+%end
