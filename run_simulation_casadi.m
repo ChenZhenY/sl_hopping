@@ -147,13 +147,13 @@ optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 % control swing leg as well
 option.leg = 2;
-%   
-% z0(9) = 0.9;
-% z0(10) = -0.5;
+option.phase_shift = 1;
 option.mid_l = 0.06;
 figure(1)
 [t, z, u, indices, slip, Cy_l] = hybrid_simulation_hop(z0,optimal_ctrl,p,[0 tf],option); % run simulation
-
+%   
+% z0(9) = 0.9;
+% z0(10) = -0.5;
 % current optimal:
 % optimal_ctrl.tf = 0.2383
 % optimal_ctrl.T = [-0.7226   -0.0033   -2.0000    2.0000

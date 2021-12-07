@@ -190,15 +190,18 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
                 angles = swing_forward_angles;
             end
             % do pd trajectory tracking for swinging leg
-            
-            t_duration = t/ctrl.tf;
-            if t_duration >= 1
-                th3d = angles(end);
-%                 th3d = z(3);
-            else
-                th3d = BezierCurve(angles, min(t_duration*2,1)); % joint traj
-                % linear interpolation
-    %             th3d = interp1([0:.5:1], swing_stance_angles, min(t/ctrl.tf/2,1));
+            if t < t_start
+                    th3d = angles(1);
+            else % start swinging the leg
+                    %duration of a swing is ctrl.tf/2
+                t_evaluate = 2*(t-t_start)/ctrl.tf;
+                if t_evaluate >= 1
+                    th3d = angles(end);
+                else
+                    th3d = BezierCurve(angles, min(t_evaluate,1)); % joint traj
+                    % linear interpolation
+        %             th3d = interp1([0:.5:1], swing_stance_angles, min(t/ctrl.tf/2,1));
+                end
             end
             
 %             u(3) = -.2;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);
@@ -234,13 +237,17 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         else
             if option.phase_shift >= 0
                 t_start = flight_duration * option.phase_shift;
-                angles = swing_backward_angles;
+                angles = swing_forward_angles;
             else
                 t_start = flight_duration * (1+option.phase_shift);
-                angles = swing_forward_angles;
+                angles = swing_backward_angles;
             end
-
-            th3d = BezierCurve(angles, min(t*2,1)); % joint traj
+            t_evaluate = 2*(t-t_start)/ctrl.tf;
+            if t_evaluate >= 1
+                th3d = angles(1);
+            else
+                th3d = BezierCurve(angles, min(t_evaluate,1)); % joint traj
+            end
             thd = vertcat(thd, th3d);
         end
 
