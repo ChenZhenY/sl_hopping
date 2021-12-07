@@ -182,25 +182,24 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
         
         if option.leg == 2 % include swinging
-            % do pd trajectory tracking for swinging leg
+            % do pd control for swinging leg
             t_evaluate = t/ctrl.tf;
             if t_evaluate >= 1
-                th3d = swing_stance_angles(end);
+%                 th3d = swing_stance_angles(end);
 %                 th3d = z(3);
+                u(3) = -.2;
                 disp(t_evaluate);
             else
                 th3d = BezierCurve(swing_stance_angles, t_evaluate/2); % joint traj
                 % linear interpolation
     %             th3d = interp1([0:.5:1], swing_stance_angles, min(t/ctrl.tf/2,1));
+                u(3) = -k_swing*(z(3)-th3d) - b_swing*z(8);% apply PD control
                 disp(u(3));
             end
-            
+    
 %             u(3) = -.2;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);
-        else
-            th3d = 0; % keep leg hanging straight down
+            
         end
-        
-        u(3) = -k_swing*(z(3)-th3d) - b_swing*z(8);% apply PD control
     else
         % PD Control in flight
 %         global th_begin;
