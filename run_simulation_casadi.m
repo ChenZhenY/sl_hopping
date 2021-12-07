@@ -31,6 +31,7 @@ N.ctrl   = 50; % number of dynamics timesteps where ctrl is applied
 % only for hopping leg
 option.leg = 1;
 option.mid_l = .04;
+option.phase_shift = 0; % phase shift between leg swings
 
 % Set parameters
 init_angle = pi/3;
@@ -145,7 +146,7 @@ tf = sol.value(ctrl.tf)+.55;          % simulation final time, no flight
 optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 % control swing leg as well
-option.leg = 1;
+option.leg = 2;
 %   
 % z0(9) = 0.9;
 % z0(10) = -0.5;

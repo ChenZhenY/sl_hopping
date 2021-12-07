@@ -169,11 +169,11 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
     k_swing = 1;
     b_swing = 0.2;
     % for swing leg; adjust to change phases
-    swing_stance_angles = [-pi/4, 0, pi/4]; % forward swing during stance
-    swing_flight_angles = [pi/4, 0, -pi/4]; % backward swing during flight
-%     swing_flight_angles = [-pi/2, - pi/4, 0, pi/2];
-%     swing_stance_angles = [pi/2, 0, -pi/2];
-    
+    swing_forward_angles = [-pi/4, 0, pi/4]; % forward swing during flight
+    swing_backward_angles = [pi/4, 0, -pi/4]; % backward swing during stance
+    stance_duration = .26; % APPROXIMATE DURATION OF STANCE PHASE: .26 seconds
+    flight_duration = t_flight;
+
     if iphase == 1 % stance
         ctrlpts = ctrl.T;
         u = zeros(3,1);
@@ -182,17 +182,23 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
         
         if option.leg == 2 % include swinging
-            % do pd trajectory tracking for swinging leg
-            t_evaluate = t/ctrl.tf;
-            if t_evaluate >= 1
-                th3d = swing_stance_angles(end);
-%                 th3d = z(3);
-                disp(t_evaluate);
+            if option.phase_shift >= 0
+                t_start = stance_duration * option.phase_shift;
+                angles = swing_backward_angles;
             else
-                th3d = BezierCurve(swing_stance_angles, t_evaluate/2); % joint traj
+                t_start = stance_duration * (1+option.phase_shift);
+                angles = swing_forward_angles;
+            end
+            % do pd trajectory tracking for swinging leg
+            
+            t_duration = t/ctrl.tf;
+            if t_duration >= 1
+                th3d = angles(end);
+%                 th3d = z(3);
+            else
+                th3d = BezierCurve(angles, min(t_duration*2,1)); % joint traj
                 % linear interpolation
     %             th3d = interp1([0:.5:1], swing_stance_angles, min(t/ctrl.tf/2,1));
-                disp(u(3));
             end
             
 %             u(3) = -.2;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);
@@ -226,7 +232,15 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin)
         if option.leg == 1
             thd = vertcat(thd, [0]);
         else
-            th3d = BezierCurve(swing_flight_angles, t); % joint traj
+            if option.phase_shift >= 0
+                t_start = flight_duration * option.phase_shift;
+                angles = swing_backward_angles;
+            else
+                t_start = flight_duration * (1+option.phase_shift);
+                angles = swing_forward_angles;
+            end
+
+            th3d = BezierCurve(angles, min(t*2,1)); % joint traj
             thd = vertcat(thd, th3d);
         end
 
