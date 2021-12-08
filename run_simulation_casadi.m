@@ -144,7 +144,8 @@ sol = opti.solve();
 clc
 
 option.phase_shift = 0.3
-option.swing = 0.6;
+option.swing = 0.3
+
 option.mid_l = 0.06;
 option.leg = 2;     % 1 for hopping leg only, 2 for both
 option.control = 2; % 1 for bezeier, 2 for joint pos
@@ -169,7 +170,11 @@ optimal_ctrl.T = 3;
 % optimal_ctrl.T  = sol.value(ctrl.T);  % control values
 
 figure(1)
-[t, z, u, indices, slip, Cy_l] = hybrid_simulation_hop(z0,optimal_ctrl,p,[0 tf],option); % run simulation
+[t, z, u, indices, slip, Cy_l, stage_changes] = hybrid_simulation_hop(z0,optimal_ctrl,p,[0 tf],option); % run simulation
+
+% print out values for data collection
+disp("Stage changes: Stage ID, Time, Distance (-1 if in flight)");
+disp(stage_changes);
 %   
 % z0(9) = 0.9;
 % z0(10) = -0.5;

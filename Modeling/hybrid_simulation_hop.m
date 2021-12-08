@@ -1,4 +1,4 @@
-function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,ctrl,p,tspan, option)
+function [tout, zout, uout, indices, slip_out, Cy_l, stage_changes] = hybrid_simulation_hop(z0,ctrl,p,tspan, option)
 % Model hopping with swinging pendulum leg and fixed rotation
 %Inputs:
 % z0 - the initial state
@@ -42,6 +42,8 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
     t_flight = 0; % duration of flight phase from phase start time (relative time)
     the_begin = zeros(3,1); % send the state at phase change (from stance2flight) to control_law
     target_pos = zeros(10,1);
+    pos_foot = position_foot(z0, p);
+    stage_changes = [1;0; pos_foot(1)]; % top row is stages, middle row is time, bottom row is position
     
     Cy_l = zeros(1,num_step-1);
     
@@ -79,8 +81,9 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
             indices = 1;
             the_begin = zout(1:3,i);
             t_phase_start = t_global;
-            disp('iphase == 2');
-            disp(t_phase_start);
+%             disp('iphase == 2');
+%             disp(t_phase_start);
+            stage_changes(:, end+1) = [2; t_phase_start; -1];
             % calculate flight time
             g = p(end-1);
             com = COM_jumping_leg(zout(:, i+1),p); %COM position & speed with respect to O
@@ -92,11 +95,12 @@ function [tout, zout, uout, indices, slip_out, Cy_l] = hybrid_simulation_hop(z0,
             end
             iphase = 1;
             t_phase_start = t_global;
-            disp('iphase == 1');
-            disp(t_phase_start);
+%             disp('iphase == 1');
+%             disp(t_phase_start);
             
             pos_foot = position_foot(zout(:,i), p);
-            dist = pos_foot(1)
+            dist = pos_foot(1);
+            stage_changes(:, end+1) = [1; t_phase_start; dist];
         end
         
         iphase_list(i+1) = iphase;    
@@ -229,7 +233,6 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
             if t < t_start
                 th3d = angles(1); 
             else % start swinging the leg
-                %duration of a swing is ctrl.tf/2
 %                 t_evaluate = 2*(t-t_start)/ctrl.tf
                 t_evaluate = (t-t_start)/(stance_duration*swing_ratio);
                 th3d = BezierCurve(angles, max(min(t_evaluate,1),0)); % joint traj
