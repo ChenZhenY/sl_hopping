@@ -83,7 +83,7 @@ function [tout, zout, uout, indices, slip_out, Cy_l, stage_changes] = hybrid_sim
             t_phase_start = t_global;
 %             disp('iphase == 2');
 %             disp(t_phase_start);
-            stage_changes(:, end+1) = [2; t_phase_start; -1];
+%             stage_changes(:, end+1) = [2; t_phase_start; -1];
             % calculate flight time
             g = p(end-1);
             com = COM_jumping_leg(zout(:, i+1),p); %COM position & speed with respect to O
