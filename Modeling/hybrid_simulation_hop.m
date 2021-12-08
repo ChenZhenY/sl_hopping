@@ -225,20 +225,16 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
                 %angles = swing_forward_angles;
                 angles = swing_backward_angles;
             end
-            % do pd trajectory tra  cking for swinging leg
+            % do pd trajectory tracking for swinging leg
             if t < t_start
                 th3d = angles(1); 
             else % start swinging the leg
                 %duration of a swing is ctrl.tf/2
 %                 t_evaluate = 2*(t-t_start)/ctrl.tf
                 t_evaluate = (t-t_start)/(stance_duration*swing_ratio);
-%                 if t_evaluate >= 1
-%                     th3d = angles(end);
-%                 else
-                th3d = BezierCurve(angles, min(t_evaluate,1)); % joint traj
+                th3d = BezierCurve(angles, max(min(t_evaluate,1),0)); % joint traj
                     % linear interpolation
                     % th3d = interp1([0:.5:1], swing_stance_angles, min(t/ctrl.tf/2,1));
-%                 end
             end
             u(3) = -k_swing*(z(3)-th3d) - b_swing*z(8);% apply PD control
 %             u(3) = -.2;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);  
@@ -267,13 +263,8 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
                 %angles = swing_backward_angles;
                 angles = swing_forward_angles;
             end
-            t_evaluate = (t-t_start)/(stance_duration*swing_ratio);
-%             if t_evaluate < 0
-%                 th3d = angles(1);
-%             elseif t_evaluate >= 1
-%                 th3d = angles(end);
-%             else
-            th3d = BezierCurve(angles, min(t_evaluate,1)); % joint traj
+            t_evaluate = (t-t_start)/(flight_duration*swing_ratio);
+            th3d = BezierCurve(angles, max(min(t_evaluate,1),0)); % joint traj
 %             end
             thd = vertcat(thd12, th3d);
         end

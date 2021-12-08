@@ -143,8 +143,8 @@ sol = opti.solve();
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
 clc
 
-option.phase_shift = 0.2
-option.swing = 0.7;
+option.phase_shift = 0.3
+option.swing = 0.6;
 option.mid_l = 0.06;
 option.leg = 2;     % 1 for hopping leg only, 2 for both
 option.control = 2; % 1 for bezeier, 2 for joint pos
