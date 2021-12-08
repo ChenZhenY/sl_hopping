@@ -222,12 +222,12 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
         if option.leg == 2 % include swinging
             if option.phase_shift >= 0
                 t_start = stance_duration * option.phase_shift;
-                % angles = swing_backward_angles;
-                angles = swing_forward_angles;
+                angles = swing_backward_angles;
+%                 angles = swing_forward_angles;
             else
                 t_start = stance_duration * (1+option.phase_shift);
-                %angles = swing_forward_angles;
-                angles = swing_backward_angles;
+                angles = swing_forward_angles;
+%                 angles = swing_backward_angles;
             end
             % do pd trajectory tracking for swinging leg
             if t < t_start
@@ -259,12 +259,12 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
         else
             if option.phase_shift >= 0
                 t_start = flight_duration * option.phase_shift;
-                %angles = swing_forward_angles;
-                angles = swing_backward_angles;
+                angles = swing_forward_angles;
+%                 angles = swing_backward_angles;
             else
                 t_start = flight_duration * (1+option.phase_shift);
-                %angles = swing_backward_angles;
-                angles = swing_forward_angles;
+                angles = swing_backward_angles;
+%                 angles = swing_forward_angles;
             end
             t_evaluate = (t-t_start)/(flight_duration*swing_ratio);
             th3d = BezierCurve(angles, max(min(t_evaluate,1),0)); % joint traj
