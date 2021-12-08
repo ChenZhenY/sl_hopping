@@ -173,53 +173,70 @@ end
 %% Control law of BezierCurve SISO
 % TODO: to be changed for three variables control
 function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, target_pos)
+    % note for swing leg:
+    % option.phase_shift changes the start time/phase
+    % coeffecient before t_evaluate changes the scale
+    % trajectory follows the swing_backward and forward
+
     k = 20;                  % stiffness (N/rad)
-    b = .5;                 % damping (N/(rad/s))
-    k_swing = 1;
-    b_swing = 0.2;
+    b = .6;                 % damping (N/(rad/s))
+    k_swing = 15;
+    b_swing = 0.5;
     % for swing leg; adjust to change phases
-    swing_stance_angles = [-pi/4, 0, pi/4]; % forward swing during stance
-    swing_flight_angles = [pi/4, 0, -pi/4]; % backward swing during flight
-%     swing_flight_angles = [-pi/2, - pi/4, 0, pi/2];
-%     swing_stance_angles = [pi/2, 0, -pi/2];
-    
-    if iphase == 1 % stance
-        u = zeros(3,1);
-        
+    swing_forward_angles = [-pi/4, 0, pi/4]; % forward swing during flight
+    swing_backward_angles = [pi/4, 0, -pi/4]; % backward swing during stance
+    stance_duration = .26; % APPROXIMATE DURATION OF STANCE PHASE: .26 seconds
+    flight_duration = t_flight;
+    u = zeros(3,1);
+
+    if iphase == 1 % stance        
         % for hopping leg control
         if option.control == 1 % using bezier curve
             ctrlpts = ctrl.T;
             % control hopping leg
             u(1) = BezierCurve(ctrlpts(1,:), t/ctrl.tf);
             u(2) = BezierCurve(ctrlpts(2,:), t/ctrl.tf);
-            if (2) < pi/6 % limit the joint angle
-                u(2) = k*(pi/6-z(2)) - b*z(7);
-                disp('violate');
-            end
         elseif option.control == 2 % using joint pos control
             err = target_pos - z;
             u(1) = k*err(1) + b*err(6);
             u(2) = k*err(2) + b*err(7);
         end
+%         if z(2) < pi/6 % limit the joint angle for stance phase
+%            u(2) = 0.1*k*(pi/6-z(2)) - b*z(7);
+%            disp('violate');
+%         end
             
         % only for swing leg control
         if option.leg == 2 % include swinging
-            % do pd control for swinging leg
-            t_evaluate = t/ctrl.tf;
-            if t_evaluate >= 1
-%                 th3d = swing_stance_angles(end);
-%                 th3d = z(3);
-                u(3) = -.2;
-                % disp(t_evaluate);
+            if option.phase_shift >= 0
+                t_start = stance_duration * option.phase_shift;
+                % angles = swing_backward_angles;
+                angles = swing_forward_angles;
             else
-                th3d = BezierCurve(swing_stance_angles, t_evaluate/2); % joint traj
-                % linear interpolation
-    %             th3d = interp1([0:.5:1], swing_stance_angles, min(t/ctrl.tf/2,1));
-                u(3) = -k_swing*(z(3)-th3d) - b_swing*z(8);% apply PD control
-                % disp(u(3));
+                t_start = stance_duration * (1+option.phase_shift);
+                %angles = swing_forward_angles;
+                angles = swing_backward_angles;
             end
+            % do pd trajectory tra  cking for swinging leg
+            if t < t_start
+                th3d = angles(1); 
+            else % start swinging the leg
+                %duration of a swing is ctrl.tf/2
+%                 t_evaluate = 2*(t-t_start)/ctrl.tf
+                t_evaluate = 2*(t-t_start)/ctrl.tf
+                if t_evaluate >= 1
+                    th3d = angles(end);
+                else
+                    th3d = BezierCurve(angles, min(t_evaluate,1)) % joint traj
+                    % linear interpolation
+                    % th3d = interp1([0:.5:1], swing_stance_angles, min(t/ctrl.tf/2,1));
+                end
+            end
+            u(3) = -k_swing*(z(3)-th3d) - b_swing*z(8);% apply PD control
 %             u(3) = -.2;%BezierCurve(ctrlpts(1,:), t/ctrl.tf);  
         end
+        
+    % flight phase control    
     else
         %control mid-phase slip length
         %calculate desired joint angle
@@ -228,29 +245,34 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
         else
             t_control = t/t_flight;
         end
-        dth = z(6:8);           % joint angular velocities
-        th = z(1:3);            % joint angles
-        thd = flight_trajectory(the_begin,option.mid_l,t_control);
+        thd12 = flight_trajectory(the_begin,option.mid_l,t_control);
+        
         if option.leg == 1
-            thd = vertcat(thd, [0]);
+            thd = vertcat(thd12, [0]);
         else
-            th3d = BezierCurve(swing_flight_angles, t); % joint traj
-            thd = vertcat(thd, th3d);
+            if option.phase_shift >= 0
+                t_start = flight_duration * option.phase_shift;
+                angles = swing_forward_angles;
+            else
+                t_start = flight_duration * (1+option.phase_shift);
+                angles = swing_backward_angles;
+            end
+            t_evaluate = 2*(t-t_start)/ctrl.tf;
+            if t_evaluate < 0
+                th3d = angles(1);
+            elseif t_evaluate >= 1
+                th3d = angles(end);
+            else
+                th3d = BezierCurve(angles, min(t_evaluate,1)); % joint traj
+            end
+            thd = vertcat(thd12, th3d);
         end
-
-        u = -[k k k_swing]'.*(th-thd) - [b b b_swing]'.*dth;% apply PD control
+        th = z(1:3);
+        dth = z(6:8);
+        u = -[k k k_swing]'.*(th-thd) - [b b b_swing]'.*dth;
+         
     end
-end
 
-        % PD Control in flight
-%         global th_begin;
-%         if indices == 1
-%            th_begin = z(1:3)            % joint angles
-%         end
-        
-%         COM_yvel = z(10) + com(4); %z(10) is y axis velocity of O
-        
-%         if t > t_flight
-%             u = zeros(3,1);
-%         else
-%end
+%       u = -[k k k_swing]'.*(th-thd) - [b b b_swing]'.*dth;% apply PD control
+    
+end

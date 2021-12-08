@@ -141,19 +141,13 @@ opti.set_initial(ctrl.T,[1 1.0 .5 0; 2.0 -1.0 .5 1]); % working for no
 sol = opti.solve();
 
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
-clc
-
-option.phase_shift = 0.2
-option.swing = 0.7;
-option.mid_l = 0.06;
-option.leg = 2;     % 1 for hopping leg only, 2 for both
-option.control = 2; % 1 for bezeier, 2 for joint pos
-
+option.leg = 2;
+option.phase_shift = 0.;
 % Set parameters
 init_angle = pi/3;
 init_length = 0.18;
 [th1, th2] = initial_condition_convert(init_angle, init_length);
-z0 = [th1; th2; 0; 0; 0; 0; 0; 0; 0.35; -0.35*tan(init_angle)]; 
+z0 = [th1; th2; -; 0; 0; 0; 0; 0; 0.35; -0.35*tan(init_angle)]; 
 
 p = parameters();                           % get parameters from file
 pos_foot0 = position_foot(z0, p);  
@@ -162,11 +156,15 @@ p = [p; ground_height];
 p(5) = .0393 + .13;     % dirty trick: make hopping better
 
 tf = 2;
-optimal_ctrl.tf = 0.8;
+optimal_ctrl.tf = 1;
 optimal_ctrl.T = 3;
 % tf = sol.value(ctrl.tf)+0.95;          % simulation final time, no flight
 % optimal_ctrl.tf = sol.value(ctrl.tf); % control final time
 % optimal_ctrl.T  = sol.value(ctrl.T);  % control values
+
+option.mid_l = 0.06;
+option.leg = 2;     % 1 for hopping leg only, 2 for both
+option.control = 2; % 1 for bezeier, 2 for joint pos
 
 figure(1)
 [t, z, u, indices, slip, Cy_l] = hybrid_simulation_hop(z0,optimal_ctrl,p,[0 tf],option); % run simulation
