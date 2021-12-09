@@ -192,6 +192,8 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
     % for swing leg; adjust to change phases
     swing_forward_angles = [-pi/4, 0, pi/4]; % forward swing during flight
     swing_backward_angles = [pi/4, 0, -pi/4]; % backward swing during stance
+%     swing_backward_angles = [-pi/4, 0, pi/4]; % forward swing during flight
+%     swing_forward_angles = [pi/4, 0, -pi/4]; % backward swing during stance
     stance_duration = .26; % APPROXIMATE DURATION OF STANCE PHASE: .26 seconds
     swing_ratio = option.swing;  % swing time ratio (similar to phase_shift) wrt stance_duration
     flight_duration = t_flight;
@@ -232,6 +234,7 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
             % do pd trajectory tracking for swinging leg
             if t < t_start
                 th3d = angles(1); 
+%                 th3d = z(3);
             else % start swinging the leg
 %                 t_evaluate = 2*(t-t_start)/ctrl.tf
                 t_evaluate = (t-t_start)/(stance_duration*swing_ratio);
@@ -268,6 +271,9 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
             end
             t_evaluate = (t-t_start)/(flight_duration*swing_ratio);
             th3d = BezierCurve(angles, max(min(t_evaluate,1),0)); % joint traj
+            if t < t_start
+%                 th3d = z(3);
+            end
 %             end
             thd = vertcat(thd12, th3d);
         end
