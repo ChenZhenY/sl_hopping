@@ -147,8 +147,8 @@ option.phase_shift = -0.7
 option.swing = 0.3
 
 option.mid_l = 0.06;
-option.leg = 2;     % 1 for hopping leg only, 2 for both
-option.control = 2; % 1 for bezeier, 2 for joint pos
+option.leg = 1;     % 1 for hopping leg only, 2 for both
+option.control = 1; % 1 for bezeier, 2 for joint pos
 
 % Set parameters
 init_angle = pi/3;
