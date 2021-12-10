@@ -143,17 +143,11 @@ sol = opti.solve();
 %% Step 5: Simulate and Visualize the Result (same as before mostly)
 clc
 
-% good para: 
-% outphase + fully extend [-.8 .7] [-.6 .4]
-% outphase other [-0.1 0.4]
-% inphase + quick [0.6 0.3]
-option.phase_shift = -.4
-option.swing = 0.6;
+option.phase_shift = 0
+option.swing = 0.3
 
 % condition check for experiment
-% if (phase_shift > 0 & phase_shift + swing_ratio>1) | (phase_shift>-swing_ratio)
-%     disp('better check your phase_shift and swing values');
-% end
+if (phase_shift > 0 & phase_shift + swing_ratio>1) | (phase_shift<0 & phase_shift)
 
 option.mid_l = 0.06;
 option.leg = 2;     % 1 for hopping leg only, 2 for both
