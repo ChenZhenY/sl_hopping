@@ -268,7 +268,7 @@ function u = control_laws(t,z,ctrl,iphase, p, option, t_flight, the_begin, targe
             end
             t_evaluate = (t-t_start)/(flight_duration*swing_ratio);
             th3d = BezierCurve(angles, max(min(t_evaluate,1),0)); % joint traj
-%             end
+%           end
             thd = vertcat(thd12, th3d);
         end
         th = z(1:3);

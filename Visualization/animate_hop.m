@@ -55,6 +55,14 @@ function animate(tspan, x, p, interval)
         
         set(h_body,'XData',[rO(1) rO(1)]);
         set(h_body,'YData',[rO(2)+0.05 rO(2)]);
+        
+        hold on
+        
+        if mod(i,50) == 0
+            hold on
+            plot()
+
+        end
 
         pause(interval) % pause .01
     end
